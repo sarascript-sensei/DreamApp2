@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "365089261866",
+    "firebase_url": "https://dreamapp-936cf.firebaseio.com",
+    "project_id": "dreamapp-936cf",
+    "storage_bucket": "dreamapp-936cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365089261866:android:1d10994c77a3f16022b653",
+        "android_client_info": {
+          "package_name": "com.example.dreamapp2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "365089261866-0io0s278cggqq9v9ah161gqu65o4i4kj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZzS1IHntJpVeBnbM5fMfg6apAcbZBD2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "365089261866-0io0s278cggqq9v9ah161gqu65o4i4kj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

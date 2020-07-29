@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/regback"
+    tools:context=".PersonRegLoginActivity">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="130dp"
+        android:text="@string/app_in_name"
+        android:textColor="@color/ColorOrange"
+        android:textSize="35sp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="160dp"
+        android:layout_centerHorizontal="true"
+        android:text="@string/app_in_after"
+        android:textColor="@color/ColorOrange"
+        android:textSize="70sp" />
+    <TextView
+        android:id="@+id/StatusPerson"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Вход для пользователей"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="250dp"
+        android:textSize="18sp"
+        android:textColor="@color/Black"/>
+
+    <EditText
+        android:id="@+id/personEmail"
+        android:layout_width="280dp"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/StatusPerson"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:layout_marginLeft="70dp"
+        android:hint="Введите вашу почту"
+        android:inputType="textEmailAddress"/>
+
+    <EditText
+        android:id="@+id/PersonPassword"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/personEmail"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Введите ваш пароль"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/btnSingIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:clickable="true"
+        android:layout_below="@id/PersonPassword"
+        android:background="@drawable/btn_sign_in"
+        android:text="@string/bottom_1" />
+
+    <Button
+        android:id="@+id/btnRegisterPerson"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:layout_below="@id/btnSingIn"
+        android:background="@drawable/btn_sign_in"
+        android:text="@string/bottom_2" />
+    <TextView
+        android:id="@+id/questionPerson"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/TextView3"
+        android:textStyle="italic"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/btnSingIn"
+        android:layout_marginTop="5dp"/>
+
+</RelativeLayout>
