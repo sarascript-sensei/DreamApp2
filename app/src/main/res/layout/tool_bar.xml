@@ -34,7 +34,8 @@
         android:src="@android:drawable/ic_menu_share"
         android:visibility="invisible"
         app:backgroundTint="@color/colorFAB"
-        app:fabSize="mini" />
+        app:fabSize="mini"
+        android:text= "Hello"/>
 
     <Button
         android:id="@+id/button"
