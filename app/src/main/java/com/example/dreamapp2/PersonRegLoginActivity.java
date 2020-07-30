@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -81,7 +82,11 @@ public class PersonRegLoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(PersonRegLoginActivity.this, "Успешный вход", Toast.LENGTH_SHORT).show();
-                } else {
+                    loadingBar.dismiss();
+                    Intent personIntent = new Intent (PersonRegLoginActivity.this, PersonMapActivity.class);
+                    startActivity(personIntent);
+                }
+                else {
                     Toast.makeText(PersonRegLoginActivity.this, "Произошла ошибка, попробуйте снова", Toast.LENGTH_SHORT).show();
                 }
                 loadingBar.dismiss();
@@ -98,7 +103,11 @@ public class PersonRegLoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(PersonRegLoginActivity.this, "Регистрация прошла успещно", Toast.LENGTH_SHORT).show();
-                } else {
+                    loadingBar.dismiss();
+                    Intent personIntent = new Intent (PersonRegLoginActivity.this, PersonMapActivity.class);
+                    startActivity(personIntent);
+                }
+                else {
                     Toast.makeText(PersonRegLoginActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
                 }
                 loadingBar.dismiss();
