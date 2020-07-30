@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/help"
     tools:context=".WelcomeActivity">
-
     <Button
         android:id="@+id/volunteerBtn"
         android:layout_width="150dp"
