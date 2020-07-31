@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                 }
                     finally {
-                        Intent welcomeIntent = new Intent(MainActivity.this, RulesActivity.class);
+                        Intent welcomeIntent = new Intent(MainActivity.this, WelcomeActivity.class);
                         startActivity(welcomeIntent);
                     }
                     }

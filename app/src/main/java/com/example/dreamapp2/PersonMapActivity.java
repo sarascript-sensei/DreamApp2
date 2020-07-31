@@ -4,26 +4,23 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.HashMap;
 
 
 public class PersonMapActivity extends FragmentActivity implements OnMapReadyCallback {
-
+    GoogleMap map;
     FloatingActionButton fab, fab1, fab2;
-    Animation fabOpen, fabClose, rotate_forward, rotate_backward;
-    boolean isOpen = false;
+    FloatingActionMenu materialDesignFAM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +31,29 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        materialDesignFAM = (FloatingActionMenu) findViewById(R.id.material_design_android_floating_action_menu);
+        fab = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item1);
+        fab1 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item2);
+        fab2 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item3);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
+            }
+        });
+        fab1.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        fab2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
     /**
      * Manipulates the map once available.
@@ -47,12 +66,15 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        if(fab.isSelected()){
+            MarkerOptions marker = new MarkerOptions().position(new LatLng(39.744655, -75.5483909)).title("Hello Maps");
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(39.744655, -75.5483909);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+// Changing marker icon
+            marker.setIcon(BitmapDescriptorFactory.fromResource(R.id.material_design_floating_action_menu_item1));
 
-
+// adding marker
+            googleMap.addMarker(marker);
+        }
     }
 }
