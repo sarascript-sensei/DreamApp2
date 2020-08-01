@@ -11,6 +11,7 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -18,6 +19,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class PersonMapActivity extends FragmentActivity implements OnMapReadyCallback {
+    BitmapDescriptor icon;
     GoogleMap map;
     FloatingActionButton fab, fab1, fab2;
     FloatingActionMenu materialDesignFAM;
@@ -67,14 +69,16 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        if(fab.isSelected()){
-            MarkerOptions marker = new MarkerOptions().position(new LatLng(39.744655, -75.5483909)).title("Hello Maps");
+        if (fab.isSelected()) {
+            icon = BitmapDescriptorFactory.fromResource(R.id.material_design_floating_action_menu_item1);
+            LatLng bangalore = new LatLng(12.9716, 77.5946);
 
-// Changing marker icon
-            marker.setIcon(BitmapDescriptorFactory.fromResource(R.id.material_design_floating_action_menu_item1));
+            MarkerOptions markerOptions = new MarkerOptions().position(bangalore)
+                    .title("Current Location")
+                    .snippet("hello").icon(icon);
 
-// adding marker
-            googleMap.addMarker(marker);
+
+            map.addMarker(markerOptions);
         }
     }
 }
