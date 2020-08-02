@@ -6,9 +6,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -22,6 +25,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -35,15 +39,38 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     Location lastLocation;
     LocationRequest locationRequest;
 
+    private ImageButton Logoutvolunteer;
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
+    private Boolean currentLogoutVolunteer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_volunteer_map);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+
+        Logoutvolunteer = (ImageButton)findViewById(R.id.LogOutVolunteer);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Logoutvolunteer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                currentLogoutVolunteer = true;
+                mAuth.signOut();
+
+                Logoutvolunteer();
+                DisconnectVolunteer();
+            }
+        });
     }
+
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -108,12 +135,33 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     @Override
     protected void onStop() {
         super.onStop();
+
+        if(!currentLogoutVolunteer) {
+
+            DisconnectVolunteer();
+            String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference VolunteerAvailabilityRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
+
+
+            GeoFire geoFire = new GeoFire(VolunteerAvailabilityRef);
+            geoFire.removeLocation(userID);
+        }
+
+    }
+
+    private void DisconnectVolunteer() {
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference VolunteerAvailabilityRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
 
 
         GeoFire geoFire = new GeoFire(VolunteerAvailabilityRef);
         geoFire.removeLocation(userID);
+    }
 
+    private void Logoutvolunteer()
+    {
+        Intent welcomeIntent = new Intent(VolunteerMapActivity.this, WelcomeActivity.class);
+        startActivity(welcomeIntent);
+        finish();
     }
     }
