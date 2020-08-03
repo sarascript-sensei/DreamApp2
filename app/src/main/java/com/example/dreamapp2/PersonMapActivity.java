@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.common.ConnectionResult;
@@ -32,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -56,6 +59,10 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     private DatabaseReference PersonDatabaseRef;
 
     private ImageButton LogOutPerson;
+    private DatabaseReference VolunteersLocationRef;
+    private int radius = 1000;
+    private Boolean volunteerFound = false;
+    private  String volunteerFoundID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
         personId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         PersonDatabaseRef = FirebaseDatabase.getInstance().getReference().child("Person's Request");
+        VolunteersLocationRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -102,6 +110,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
 
                 mMap.addMarker(markerOptions);
+                getNearbyVolunteers();
             }
         });
         fab1.setOnClickListener(new View.OnClickListener() {
@@ -184,5 +193,45 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         Intent welcomeIntent = new Intent(PersonMapActivity.this, WelcomeActivity.class);
         startActivity(welcomeIntent);
         finish();
+    }
+    private void getNearbyVolunteers() {
+        GeoFire geoFire = new GeoFire(VolunteersLocationRef);
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(PersonPostion.latitude, PersonPostion.longitude),radius);
+        geoQuery.removeAllListeners();
+
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                if (!volunteerFound) {
+                    volunteerFound = true;
+                    volunteerFoundID = key;
+                }
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                if (!volunteerFound)
+                {
+                    radius = radius + 1;
+                    getNearbyVolunteers();
+                }
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
     }
 }
