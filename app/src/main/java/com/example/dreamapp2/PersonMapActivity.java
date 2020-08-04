@@ -298,5 +298,6 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     }
                 });
+
     }
 }
