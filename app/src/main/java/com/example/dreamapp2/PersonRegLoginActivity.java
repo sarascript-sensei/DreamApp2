@@ -16,6 +16,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class PersonRegLoginActivity extends AppCompatActivity {
     TextView StatusPerson, questionPerson;
@@ -23,6 +25,8 @@ public class PersonRegLoginActivity extends AppCompatActivity {
     EditText emailET, passwordET;
     FirebaseAuth mAuth;
     ProgressDialog loadingBar;
+    DatabaseReference PersonDatabaseRef;
+    String OnlinePersonID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,7 @@ public class PersonRegLoginActivity extends AppCompatActivity {
         passwordET = (EditText) findViewById(R.id.PersonPassword);
 
         mAuth = FirebaseAuth.getInstance();
+
         loadingBar = new ProgressDialog(this);
 
         btnRegisterPerson.setVisibility(View.INVISIBLE);
@@ -102,10 +107,18 @@ public class PersonRegLoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(PersonRegLoginActivity.this, "Регистрация прошла успещно", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
+                    OnlinePersonID = mAuth.getCurrentUser().getUid();
+                    PersonDatabaseRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child("Persons").child(OnlinePersonID);
+                    PersonDatabaseRef.setValue(true);
+
                     Intent personIntent = new Intent (PersonRegLoginActivity.this, PersonMapActivity.class);
                     startActivity(personIntent);
+
+                    Toast.makeText(PersonRegLoginActivity.this, "Регистрация прошла успещно", Toast.LENGTH_SHORT).show();
+                    loadingBar.dismiss();
+
+
                 }
                 else {
                     Toast.makeText(PersonRegLoginActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();

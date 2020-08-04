@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
                 super.run();
                 {
                     try {
-                        sleep(5000);
+                        sleep(3000);
                     }
                     catch(Exception e)
                     {

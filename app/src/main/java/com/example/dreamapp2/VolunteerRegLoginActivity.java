@@ -16,12 +16,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class VolunteerRegLoginActivity extends AppCompatActivity {
     TextView StatusVolunteer, questionVolunteer;
     Button btnRegisterVolunteer, btnSingInVolunteer;
     EditText emailET, passwordET;
     FirebaseAuth mAuth;
+    DatabaseReference VolunteerDatabaseRef;
+    String OnlineVolunteerID;
     ProgressDialog loadingBar;
 
     @Override
@@ -103,10 +107,17 @@ public class VolunteerRegLoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(VolunteerRegLoginActivity.this, "Регистрация прошла успещно", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
+                    OnlineVolunteerID = mAuth.getCurrentUser().getUid();
+                    VolunteerDatabaseRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child("Volunteers").child(OnlineVolunteerID);
+                   VolunteerDatabaseRef.setValue(true);
+
                     Intent volunteerIntent = new Intent (VolunteerRegLoginActivity.this, VolunteerMapActivity.class);
                     startActivity(volunteerIntent);
+
+                    Toast.makeText(VolunteerRegLoginActivity.this, "Регистрация прошла успещно", Toast.LENGTH_SHORT).show();
+                    loadingBar.dismiss();
+
                 }
                 else
                     {
