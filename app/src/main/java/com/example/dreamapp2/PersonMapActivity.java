@@ -31,12 +31,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.List;
 
 
 public class PersonMapActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -52,13 +58,17 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     Location lastLocation;
     LocationRequest locationRequest;
     private LatLng PersonPostion;
+    Marker VolunteerMarker;
 
     BitmapDescriptorFactory icon;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private DatabaseReference PersonDatabaseRef;
 
+    private DatabaseReference VolunteersRef;
+
     private ImageButton LogOutPerson;
+    private DatabaseReference VolunteersAvailableRef;
     private DatabaseReference VolunteersLocationRef;
     private int radius = 1000;
     private Boolean volunteerFound = false;
@@ -76,7 +86,8 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
         personId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         PersonDatabaseRef = FirebaseDatabase.getInstance().getReference().child("Person's Request");
-        VolunteersLocationRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
+        VolunteersAvailableRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
+        VolunteersLocationRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Helping");
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -195,7 +206,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         finish();
     }
     private void getNearbyVolunteers() {
-        GeoFire geoFire = new GeoFire(VolunteersLocationRef);
+        GeoFire geoFire = new GeoFire(VolunteersAvailableRef);
         GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(PersonPostion.latitude, PersonPostion.longitude),radius);
         geoQuery.removeAllListeners();
 
@@ -205,6 +216,14 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                 if (!volunteerFound) {
                     volunteerFound = true;
                     volunteerFoundID = key;
+
+                    VolunteersRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Volunteers").child(volunteerFoundID);
+                    HashMap volunteerMap = new HashMap();
+                    volunteerMap.put("PersonHelpID", personId);
+
+                    VolunteersRef.updateChildren(volunteerMap);
+
+                    GetVolunteerLocation();
                 }
             }
 
@@ -233,5 +252,51 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
             }
         });
+    }
+
+    private void GetVolunteerLocation() {
+        VolunteersLocationRef.child(volunteerFoundID).child("l").
+                addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists())
+                    {
+                        List<Object> volunteerLocationMap = (List<Object>) snapshot.getValue();
+                        double LocationLatitude = 0;
+                        double LocationLongitude = 0;
+                        //Сюда добавить код с запросом на принятие помощи
+
+                        if (volunteerLocationMap.get(0) != null)
+                        {
+                            LocationLatitude = Double.parseDouble(volunteerLocationMap.get(0).toString());
+                        }
+                        if (volunteerLocationMap.get(1) != null)
+                        {
+                            LocationLongitude = Double.parseDouble(volunteerLocationMap.get(1).toString());
+                        }
+                        LatLng VolunteerLatLong = new LatLng(LocationLatitude, LocationLongitude);
+
+
+                        if (VolunteerMarker != null)
+                        {
+                            VolunteerMarker.remove();
+                        }
+                        Location location1 = new Location("");
+                        location1.setLatitude(PersonPostion.latitude);
+                        location1.setLongitude(PersonPostion.longitude);
+
+                        Location location2 = new Location("");
+                        location2.setLatitude(VolunteerLatLong.latitude);
+                        location2.setLongitude(VolunteerLatLong.longitude);
+
+                        VolunteerMarker = mMap.addMarker(new MarkerOptions().position(VolunteerLatLong));
+                    }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 }
