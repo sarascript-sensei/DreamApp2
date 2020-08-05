@@ -10,14 +10,11 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <ImageView
+        android:layout_width="100sp"
+        android:layout_height="100sp"
+        android:id="@+id/personProfileImage"/>
 
-
-    <ImageButton
-        android:id="@+id/LogOutVolunteer"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="300dp"
-        android:src="@drawable/ic_exit" />
+    <include layout="@layout/toolbox2"/>
 
 </RelativeLayout>

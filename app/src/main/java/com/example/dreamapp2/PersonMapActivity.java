@@ -6,12 +6,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -59,6 +65,8 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     LocationRequest locationRequest;
     private LatLng PersonPostion;
     Marker VolunteerMarker;
+    final Context context = this;
+    private EditText result;
 
     BitmapDescriptorFactory icon;
     private FirebaseAuth mAuth;
@@ -112,27 +120,93 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                 GeoFire geofire = new GeoFire(PersonDatabaseRef);
                 geofire.setLocation(personId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
 
+
                 PersonPostion = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
                 BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.oxygen);
 
+
                 MarkerOptions markerOptions = new MarkerOptions().position(PersonPostion)
                         .title("Current Location")
-                        .snippet("hello").icon(icon);
+                        .snippet("hello").icon(icon)
+                        .title("ss");
 
 
                 mMap.addMarker(markerOptions);
                 getNearbyVolunteers();
+
             }
         });
         fab1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
                 Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
+                GeoFire geofire = new GeoFire(PersonDatabaseRef);
+                geofire.setLocation(personId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
+
+
+                PersonPostion = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
+                BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.oxygen);
+
+
+                MarkerOptions markerOptions = new MarkerOptions().position(PersonPostion)
+                        .snippet("DDDDDD").icon(icon)
+                        .title("ss");
+
+
+                mMap.addMarker(markerOptions);
+                getNearbyVolunteers();
 
             }
         });
         fab2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
+                GeoFire geofire = new GeoFire(PersonDatabaseRef);
+                geofire.setLocation(personId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
+
+
+                PersonPostion = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
+                BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.oxygen);
+                LayoutInflater li = LayoutInflater.from(context);
+                View promptsView = li.inflate(R.layout.android_user_input_dialog, null);
+                final TextView result = (TextView)findViewById(R.id.textView1);
+
+                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        context);
+
+                // set prompts.xml to alertdialog builder
+                alertDialogBuilder.setView(promptsView);
+
+
+                final EditText userInput = (EditText) promptsView
+                        .findViewById(R.id.editTextDialogUserInput);
+
+                // set dialog message
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        // get user input and set it to result
+                                        // edit text
+                                        result.setText(userInput.getText().toString());
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+                MarkerOptions markerOptions = new MarkerOptions().position(PersonPostion)
+                        .snippet(String.valueOf(userInput)).icon(icon)
+                        .title("ss");
+
+                mMap.addMarker(markerOptions);
             }
         });
     }
@@ -206,6 +280,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         finish();
     }
     private void getNearbyVolunteers() {
+        DatabaseReference volunteerLocation = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
         GeoFire geoFire = new GeoFire(VolunteersAvailableRef);
         GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(PersonPostion.latitude, PersonPostion.longitude),radius);
         geoQuery.removeAllListeners();

@@ -87,4 +87,13 @@
         android:layout_below="@+id/btnSingIn"
         android:layout_marginTop="5dp"/>
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="35sp"
+        android:layout_height="100sp"
+        android:layout_marginLeft="160dp"
+        android:layout_marginTop="170dp"
+        android:rotation="40"
+        app:srcCompat="@drawable/lenta" />
+
 </RelativeLayout>

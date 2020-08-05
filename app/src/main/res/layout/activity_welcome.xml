@@ -11,17 +11,21 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:background="@drawable/btn_sign_in"
         android:layout_marginTop="300dp"
         android:text="Я хочу помочь"
+        android:textStyle="bold"
         android:textAllCaps="false" />
 
     <Button
         android:id="@+id/personBtn"
+        android:textStyle="bold"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="Мне нужна помощь"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
+        android:background="@drawable/btn_sign_in"
         android:layout_below="@+id/volunteerBtn"
         android:textAllCaps="false"/>
 </RelativeLayout>

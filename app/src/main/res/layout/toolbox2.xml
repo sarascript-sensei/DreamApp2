@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:fab="http://schemas.android.com/apk/res-auto"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
-
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 <com.github.clans.fab.FloatingActionMenu
-    android:id="@+id/material_design_android_floating_action_menu"
+    android:id="@+id/toolbar"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentRight="true"
-    android:layout_marginBottom="11dp"
-    android:layout_marginLeft="11dp"
-    android:layout_marginRight="11dp"
+    android:layout_alignParentLeft="true"
     fab:menu_animationDelayPerItem="55"
-    fab:menu_backgroundColor="@android:color/transparent"
-    fab:menu_buttonSpacing="0dp"
-    fab:menu_colorNormal="#da3c2f"
+    fab:menu_buttonSpacing="10dp"
     fab:menu_colorPressed="#dc4b3f"
     fab:menu_colorRipple="#99d4d4d4"
     fab:menu_fab_size="normal"
-    fab:menu_icon="@drawable/fab_add"
+    fab:menu_icon="@drawable/ic_baseline_more_vert_24"
     fab:menu_labels_colorNormal="#333"
     fab:menu_labels_colorPressed="#444"
     fab:menu_labels_colorRipple="#66efecec"
@@ -36,7 +29,7 @@ android:layout_height="match_parent">
     fab:menu_labels_singleLine="false"
     fab:menu_labels_textColor="#f2f1f1"
     fab:menu_labels_textSize="15sp"
-    fab:menu_openDirection="up"
+    fab:menu_openDirection="down"
     fab:menu_shadowColor="#66aff198"
     fab:menu_shadowRadius="4dp"
     fab:menu_shadowXOffset="1dp"
@@ -44,7 +37,16 @@ android:layout_height="match_parent">
     fab:menu_showShadow="true">
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/material_design_floating_action_menu_item1"
+        android:id="@+id/LogOutPerson"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_exit"
+        android:focusable="true"
+        android:clickable="true"
+        fab:fab_size="mini" />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/OwnInformation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_oxygen"
@@ -52,23 +54,5 @@ android:layout_height="match_parent">
         android:clickable="true"
         fab:fab_size="mini" />
 
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/material_design_floating_action_menu_item2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_music_and_multimedia"
-        android:focusable="true"
-        android:clickable="true"
-        fab:fab_size="mini" />
-
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/material_design_floating_action_menu_item3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_sos"
-        android:focusable="true"
-        android:clickable="true"
-        fab:fab_size="mini" />
 </com.github.clans.fab.FloatingActionMenu>
-
 </RelativeLayout>

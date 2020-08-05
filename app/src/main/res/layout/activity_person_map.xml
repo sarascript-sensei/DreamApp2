@@ -11,15 +11,9 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <ImageButton
-        android:id="@+id/LogOutPerson"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="300dp"
-        android:src="@drawable/ic_exit" />
 
-
+<include layout="@layout/toolbox2"/>
 <include layout="@layout/toolbox"/>
+    <include layout="@layout/android_user_input_dialog"/>
 
 </RelativeLayout>
