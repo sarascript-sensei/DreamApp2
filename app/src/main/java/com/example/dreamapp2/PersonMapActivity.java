@@ -78,7 +78,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     private ImageButton LogOutPerson;
     private DatabaseReference VolunteersAvailableRef;
     private DatabaseReference VolunteersLocationRef;
-    private int radius = 1000;
+    private int radius = 1;
     private Boolean volunteerFound = false;
     private  String volunteerFoundID;
 
@@ -88,7 +88,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         setContentView(R.layout.activity_person_map);
 
 
-        LogOutPerson = (ImageButton)findViewById(R.id.LogOutPerson);
+        LogOutPerson = (FloatingActionButton)findViewById(R.id.LogOut);
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
@@ -281,7 +281,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     }
     private void getNearbyVolunteers() {
         DatabaseReference volunteerLocation = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
-        GeoFire geoFire = new GeoFire(VolunteersAvailableRef);
+        GeoFire geoFire = new GeoFire(volunteerLocation);
         GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(PersonPostion.latitude, PersonPostion.longitude),radius);
         geoQuery.removeAllListeners();
 
