@@ -40,16 +40,32 @@
         android:id="@+id/LogOut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_exit"
+        android:src="@drawable/exit"
         android:focusable="true"
         android:clickable="true"
         fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/OwnInformation"
+        android:id="@+id/rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_oxygen"
+        android:src="@drawable/review"
+        android:focusable="true"
+        android:clickable="true"
+        fab:fab_size="mini" />
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/comminty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/help"
+        android:focusable="true"
+        android:clickable="true"
+        fab:fab_size="mini" />
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/OwnInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/usser"
         android:focusable="true"
         android:clickable="true"
         fab:fab_size="mini" />

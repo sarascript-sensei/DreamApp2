@@ -15,8 +15,10 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,8 +49,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class PersonMapActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -57,8 +61,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         com.google.android.gms.location.LocationListener
 {
     private GoogleMap mMap;
-    FloatingActionButton fab, fab1, fab2;
-    FloatingActionMenu materialDesignFAM;
+    Button MarkerChoiser, DescripMarker;
     GoogleApiClient googleApiClient;
     private String personId;
     Location lastLocation;
@@ -88,7 +91,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         setContentView(R.layout.activity_person_map);
 
 
-        LogOutPerson = (FloatingActionButton)findViewById(R.id.LogOut);
+        LogOutPerson = (FloatingActionButton) findViewById(R.id.LogOut);
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
@@ -109,110 +112,12 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
             }
         });
 
-        materialDesignFAM = (FloatingActionMenu) findViewById(R.id.material_design_android_floating_action_menu);
-        fab = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item1);
-        fab1 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item2);
-        fab2 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item3);
+        TextView textView = (TextView)findViewById(R.id.alertDialogTextView);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
-                GeoFire geofire = new GeoFire(PersonDatabaseRef);
-                geofire.setLocation(personId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
+        this.Marker(textView);
 
 
-                PersonPostion = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
-                BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.oxygen);
-
-
-                MarkerOptions markerOptions = new MarkerOptions().position(PersonPostion)
-                        .title("Current Location")
-                        .snippet("hello").icon(icon)
-                        .title("ss");
-
-
-                mMap.addMarker(markerOptions);
-                getNearbyVolunteers();
-
-            }
-        });
-        fab1.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-                Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
-                GeoFire geofire = new GeoFire(PersonDatabaseRef);
-                geofire.setLocation(personId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-
-                PersonPostion = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
-                BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.oxygen);
-
-
-                MarkerOptions markerOptions = new MarkerOptions().position(PersonPostion)
-                        .snippet("DDDDDD").icon(icon)
-                        .title("ss");
-
-
-                mMap.addMarker(markerOptions);
-                getNearbyVolunteers();
-
-            }
-        });
-        fab2.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Toast.makeText(PersonMapActivity.this, "Маркер выбран", Toast.LENGTH_SHORT).show();
-                GeoFire geofire = new GeoFire(PersonDatabaseRef);
-                geofire.setLocation(personId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-
-                PersonPostion = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
-                BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.oxygen);
-                LayoutInflater li = LayoutInflater.from(context);
-                View promptsView = li.inflate(R.layout.android_user_input_dialog, null);
-                final TextView result = (TextView)findViewById(R.id.textView1);
-
-                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        context);
-
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
-
-
-                final EditText userInput = (EditText) promptsView
-                        .findViewById(R.id.editTextDialogUserInput);
-
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        // get user input and set it to result
-                                        // edit text
-                                        result.setText(userInput.getText().toString());
-                                    }
-                                })
-                        .setNegativeButton("Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-                MarkerOptions markerOptions = new MarkerOptions().position(PersonPostion)
-                        .snippet(String.valueOf(userInput)).icon(icon)
-                        .title("ss");
-
-                mMap.addMarker(markerOptions);
-            }
-        });
-    }
-
-
-
+        };
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -222,6 +127,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        buildGoogleApiClient();
         mMap.setMyLocationEnabled(true);
     }
 
@@ -278,101 +184,58 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         Intent welcomeIntent = new Intent(PersonMapActivity.this, WelcomeActivity.class);
         startActivity(welcomeIntent);
         finish();
+
+
     }
-    private void getNearbyVolunteers() {
-        DatabaseReference volunteerLocation = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
-        GeoFire geoFire = new GeoFire(volunteerLocation);
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(PersonPostion.latitude, PersonPostion.longitude),radius);
-        geoQuery.removeAllListeners();
+    private void Marker(TextView textView) {
+        final TextView textViewTmp = textView;
 
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                if (!volunteerFound) {
-                    volunteerFound = true;
-                    volunteerFoundID = key;
+        Button choise = (Button) findViewById(R.id.choise);
 
-                    VolunteersRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Volunteers").child(volunteerFoundID);
-                    HashMap volunteerMap = new HashMap();
-                    volunteerMap.put("PersonHelpID", personId);
+        choise.setOnClickListener(new View.OnClickListener() {
 
-                    VolunteersRef.updateChildren(volunteerMap);
+            // Each image in array will be displayed at each item beginning.
+            private int[] imageIdArr = {R.drawable.oxygen, R.drawable.medicine, R.drawable.diet};
+            // Each item text.
+            private String[] listItemArr = {"СИЗ", "Лекарства", "Еда"};
 
-                    GetVolunteerLocation();
-                }
-            }
+            // Image and text item data's key.
+            private final String CUSTOM_ADAPTER_IMAGE = "image";
+            private final String CUSTOM_ADAPTER_TEXT = "text";
 
             @Override
-            public void onKeyExited(String key) {
+            public void onClick(View view) {
+                // Create a alert dialog builder.
+                AlertDialog.Builder builder = new AlertDialog.Builder(PersonMapActivity.this);
+                // Set icon value.
+                builder.setIcon(R.mipmap.ic_launcher);
+                // Set title value.
+                builder.setTitle("Simple Adapter Alert Dialog");
 
-            }
+                // Create SimpleAdapter list data.
+                List<Map<String, Object>> dialogItemList = new ArrayList<Map<String, Object>>();
+                int listItemLen = listItemArr.length;
+                for (int i = 0; i < listItemLen; i++) {
+                    Map<String, Object> itemMap = new HashMap<String, Object>();
+                    itemMap.put(CUSTOM_ADAPTER_IMAGE, imageIdArr[i]);
+                    itemMap.put(CUSTOM_ADAPTER_TEXT, listItemArr[i]);
 
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-                if (!volunteerFound)
-                {
-                    radius = radius + 1;
-                    getNearbyVolunteers();
+                    dialogItemList.add(itemMap);
                 }
 
-            }
+                // Create SimpleAdapter object.
+                SimpleAdapter simpleAdapter = new SimpleAdapter(PersonMapActivity.this, dialogItemList,
+                        R.layout.android_user_input_dialog,
+                        new String[]{CUSTOM_ADAPTER_IMAGE, CUSTOM_ADAPTER_TEXT},
+                        new int[]{R.id.alertDialogItemImageView, R.id.alertDialogItemTextView});
 
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
+                // Set the data adapter.
 
+
+                builder.setCancelable(false);
+                builder.create();
+                builder.show();
             }
         });
-    }
-
-    private void GetVolunteerLocation() {
-        VolunteersLocationRef.child(volunteerFoundID).child("l").
-                addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists())
-                    {
-                        List<Object> volunteerLocationMap = (List<Object>) snapshot.getValue();
-                        double LocationLatitude = 0;
-                        double LocationLongitude = 0;
-                        //Сюда добавить код с запросом на принятие помощи
-
-                        if (volunteerLocationMap.get(0) != null)
-                        {
-                            LocationLatitude = Double.parseDouble(volunteerLocationMap.get(0).toString());
-                        }
-                        if (volunteerLocationMap.get(1) != null)
-                        {
-                            LocationLongitude = Double.parseDouble(volunteerLocationMap.get(1).toString());
-                        }
-                        LatLng VolunteerLatLong = new LatLng(LocationLatitude, LocationLongitude);
-
-
-                        if (VolunteerMarker != null)
-                        {
-                            VolunteerMarker.remove();
-                        }
-                        Location location1 = new Location("");
-                        location1.setLatitude(PersonPostion.latitude);
-                        location1.setLongitude(PersonPostion.longitude);
-
-                        Location location2 = new Location("");
-                        location2.setLatitude(VolunteerLatLong.latitude);
-                        location2.setLongitude(VolunteerLatLong.longitude);
-
-                        VolunteerMarker = mMap.addMarker(new MarkerOptions().position(VolunteerLatLong));
-                    }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
     }
 }

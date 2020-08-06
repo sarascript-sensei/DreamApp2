@@ -17,7 +17,10 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,8 +37,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class VolunteerMapActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -47,119 +53,67 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     Location lastLocation;
     LocationRequest locationRequest;
 
-    private ImageButton Logoutvolunteer;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private Boolean currentLogoutVolunteer;
-    private DatabaseReference assignedPersonRef, AssignedPersonPositionRef;
-    private String volunteerID, personID;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_volunteer_map);
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        volunteerID = mAuth.getCurrentUser().getUid();
-
-        Logoutvolunteer = (FloatingActionButton) findViewById(R.id.LogOut);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        Logoutvolunteer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FirebaseAuth.getInstance().signOut();
-                Intent welcomeIntent = new Intent(VolunteerMapActivity.this, WelcomeActivity.class);
-                startActivity(welcomeIntent);
-                finish();
             }
-        });
-
-        getAssignedPersonRequest();
-    }
-
-    private void getAssignedPersonRequest() {
-        String volunteerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference assignedPersonRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Volunteers").child(volunteerID);
-
-        assignedPersonRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Map<String, Object> map = (Map<String, Object>) snapshot.getValue();
-                    if (map.get("personHelpID") != null) {
-                        personID = map.get("personHelpID").toString();
-                        getAssignedPersonPosition();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void getAssignedPersonPosition() {
-        String volunteerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference AssignedPersonPositionRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Volunteers").child(volunteerID);
-
-        AssignedPersonPositionRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    List<Object> personPosition = (List<Object>) snapshot.getValue();
-                    double LocationLatitude = 0;
-                    double LocationLongitude = 0;
-                    //Сюда добавить код с запросом на принятие помощи
-
-                    if (personPosition.get(0) != null) {
-                        LocationLatitude = Double.parseDouble(personPosition.get(0).toString());
-                    }
-                    if (personPosition.get(1) != null) {
-                        LocationLongitude = Double.parseDouble(personPosition.get(1).toString());
-                    }
-                    LatLng VolunteerLatLong = new LatLng(LocationLatitude, LocationLongitude);
-                    mMap.addMarker(new MarkerOptions().position(VolunteerLatLong));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-    }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        buildGoogleApiClient();
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        buildGoogleApiClient();
         mMap.setMyLocationEnabled(true);
     }
+protected synchronized void buildGoogleApiClient(){
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        googleApiClient.connect();
+}
 
+
+    @Override
+    public void onLocationChanged(Location location) {
+        lastLocation = location;
+
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLatitude());
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Volunteers Available");
+
+        GeoFire geoFire = new GeoFire(ref);
+        geoFire.setLocation(userID, new GeoLocation(location.getLatitude(),location.getLongitude()));
+    }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         locationRequest = new LocationRequest();
         locationRequest.setInterval(1000);
         locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(locationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+
     }
 
     @Override
@@ -173,65 +127,14 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        if (getApplicationContext() != null) {
-            lastLocation = location;
-
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-
-            String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseReference VolunteerAvalabilityRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Avaible");
-            GeoFire geoFireAvailable = new GeoFire(VolunteerAvalabilityRef);
-
-
-            DatabaseReference VolunteerHelping = FirebaseDatabase.getInstance().getReference().child("Volunteer Helping");
-            GeoFire geoFireHelping = new GeoFire(VolunteerHelping);
-
-
-            switch (personID) {
-                case "":
-                    geoFireHelping.removeLocation(userID);
-                    geoFireAvailable.setLocation(userID, new GeoLocation(location.getLatitude(), location.getLongitude()));
-                    break;
-                default:
-                    geoFireAvailable.removeLocation(userID);
-                    geoFireHelping.setLocation(userID, new GeoLocation(location.getLatitude(), location.getLongitude()));
-            }
-        }
-
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        googleApiClient.connect();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference VolunteerAvailabilityRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Volunteers Available");
 
-
-        GeoFire geoFire = new GeoFire(VolunteerAvailabilityRef);
-        geoFire.removeLocation(userID);
-    }
-
-
-    private void DisconnectVolunteer() {
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference VolunteerAvailabilityRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
-
-
-        GeoFire geoFire = new GeoFire(VolunteerAvailabilityRef);
+        GeoFire geoFire = new GeoFire(ref);
         geoFire.removeLocation(userID);
     }
 }
+

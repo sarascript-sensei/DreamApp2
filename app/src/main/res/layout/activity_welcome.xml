@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/help"
+    android:background="@drawable/help1"
     tools:context=".WelcomeActivity">
     <Button
         android:id="@+id/volunteerBtn"
@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:background="@drawable/btn_sign_in"
+        android:textColor="#ffff"
         android:layout_marginTop="300dp"
         android:text="Я хочу помочь"
         android:textStyle="bold"
@@ -22,6 +23,7 @@
         android:textStyle="bold"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:textColor="#ffff"
         android:text="Мне нужна помощь"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"

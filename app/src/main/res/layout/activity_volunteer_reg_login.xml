@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/regback"
+    android:background="@drawable/background"
     tools:context=".VolunteerRegLoginActivity">
     <TextView
+        android:id="@+id/karta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="100dp"
         android:text="@string/app_in_name"
         android:textColor="@color/ColorOrange"
         android:textSize="35sp"
@@ -17,9 +18,11 @@
         android:layout_centerHorizontal="true"/>
 
     <TextView
+        android:id="@+id/wish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="45dp"
+        android:layout_alignTop="@+id/karta"
         android:layout_centerHorizontal="true"
         android:letterSpacing="0.05"
         android:text= "@string/app_in_after"
@@ -30,11 +33,12 @@
         android:id="@+id/StatusVolunteer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Вход для пользователей"
+        android:text="Вход для волонтёров"
+        android:layout_below="@+id/wish"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="250dp"
+        android:layout_marginTop="27dp"
         android:textSize="18sp"
-        android:textColor="@color/Black"/>
+        android:textColor="#ffff"/>
 
     <EditText
         android:id="@+id/volunteerEmail"
@@ -42,22 +46,26 @@
         android:gravity="center"
         android:layout_height="wrap_content"
         android:layout_below="@+id/StatusVolunteer"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="30dp"
         android:ems="10"
-        android:layout_marginLeft="70dp"
+        android:layout_marginLeft="50dp"
         android:hint="Введите вашу почту"
+        android:textColor="#fff"
+        android:textColorHint="#fff"
         android:inputType="textEmailAddress"/>
 
     <EditText
+        android:textColor="#fff"
         android:id="@+id/volunteerPassword"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/volunteerEmail"
-        android:layout_marginLeft="70dp"
+        android:layout_marginLeft="50dp"
         android:layout_marginTop="10dp"
         android:ems="10"
         android:gravity="center"
         android:hint="Введите ваш пароль"
+        android:textColorHint="#fff"
         android:inputType="textPassword" />
 
     <Button
@@ -67,6 +75,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:clickable="true"
+        android:textColor="#ffff"
         android:layout_below="@id/volunteerPassword"
         android:background="@drawable/btn_sign_in"
         android:text="@string/bottom_1" />
@@ -76,6 +85,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:textColor="#ffff"
         android:layout_marginTop="30dp"
         android:layout_below="@id/btnSingInVolunteer"
         android:background="@drawable/btn_sign_in"
@@ -85,7 +95,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/TextView3"
-        android:textStyle="italic"
+        android:textStyle="bold"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/btnSingInVolunteer"
         android:layout_marginTop="5dp"/>
@@ -94,8 +104,8 @@
         android:id="@+id/imageView"
         android:layout_width="35sp"
         android:layout_height="120sp"
-        android:layout_marginLeft="160dp"
-        android:layout_marginTop="158dp"
+        android:layout_below="@+id/karta"
+        android:layout_marginLeft="135dp"
         android:rotation="42"
         app:srcCompat="@drawable/lenta" />
 
