@@ -15,6 +15,6 @@
         android:layout_height="100sp"
         android:id="@+id/personProfileImage"/>
 
-    <include layout="@layout/toolbox2"/>
+    <include layout="@layout/toolbox3"/>
 
 </RelativeLayout>
