@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.dreamapp2">
 
     <!--
@@ -43,12 +44,15 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity
-            android:name=".PersonMapActivity"
-            android:label="@string/title_activity_person_map"></activity>
+        <activity android:name=".PersonMapActivity"
+            android:label="@string/title_activity_person_map"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".VolunteerMapActivity"
-            android:label="@string/title_activity_volunteer_map" />
+            android:label="@string/title_activity_volunteer_map"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
         <activity android:name=".PersonRegLoginActivity" />
         <activity android:name=".VolunteerRegLoginActivity" />
         <activity android:name=".WelcomeActivity" />

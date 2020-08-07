@@ -4,16 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+
 import android.Manifest;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -26,51 +28,52 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class PersonMapActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener {
+    private  SupportMapFragment mapFragment;
     private GoogleMap mMap;
-    Button MarkerChoiser, DescripMarker;
-    private LatLng pickupLocation;
     GoogleApiClient googleApiClient;
-    private String personId;
+
     Location lastLocation;
     LocationRequest locationRequest;
+    private Button MarkerChoise;
 
 
+    private ImageButton LogOut;
+    private LatLng pickupLocation;
 
-    private ImageButton LogOutPerson;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_map);
 
-        LogOutPerson = (FloatingActionButton) findViewById(R.id.LogOut);
-        MarkerChoiser = (Button)findViewById(R.id.choise);
+        LogOut = (FloatingActionButton) findViewById(R.id.LogOut);
+        MarkerChoise = (Button) findViewById(R.id.choise);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(PersonMapActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+        }else {
+            mapFragment.getMapAsync(this);
+        }
 
-        LogOutPerson.setOnClickListener(new View.OnClickListener() {
+        LogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
@@ -80,8 +83,43 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                 return;
             }
         });
+        MarkerChoise.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("personRequest");
+                GeoFire geoFire = new GeoFire(ref);
+                geoFire.setLocation(userId, new GeoLocation(lastLocation.getLatitude(),lastLocation.getLongitude()));
+
+                pickupLocation = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
+                AlertDialog.Builder builder = new AlertDialog.Builder(PersonMapActivity.this);
+                builder.setTitle("Я нуждаюсь в ");
+
+// add a list
+                String[] animals = {"Продукты", "Лекарства", "СИЗ", "Попутка", "Помощь(SOS)"};
+                final MarkerOptions markerOptions = new MarkerOptions();
+                builder.setItems(animals, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0: markerOptions.position(pickupLocation).title("Продукты").icon(BitmapDescriptorFactory.fromResource(R.drawable.diet));
+                            case 1: markerOptions.position(pickupLocation).title("Лекарства").icon(BitmapDescriptorFactory.fromResource(R.drawable.medicine));
+                            case 2: markerOptions.position(pickupLocation).title("СИЗ").icon(BitmapDescriptorFactory.fromResource(R.drawable.oxygen));
+                            case 3: markerOptions.position(pickupLocation).title("Попутка").icon(BitmapDescriptorFactory.fromResource(R.drawable.car));
+                            case 4: markerOptions.position(pickupLocation).title("Помощь(SOS)").icon(BitmapDescriptorFactory.fromResource(R.drawable.diet));
+                        }
+                    }
+                });
+
+// create and show the alert dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
     }
+
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -102,17 +140,21 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
         googleApiClient.connect();
     }
-        @Override
-        public void onLocationChanged(Location location) {
-            if (getApplicationContext() != null) {
-                lastLocation = location;
+    @Override
+    public void onLocationChanged(Location location) {
+        lastLocation = location;
 
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
 
-            }
-        }
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("VolunteersAvailable");
+
+        GeoFire geoFire = new GeoFire(ref);
+        geoFire.setLocation(userID, new GeoLocation(location.getLatitude(),location.getLongitude()));
+    }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         locationRequest = new LocationRequest();
@@ -121,7 +163,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+            ActivityCompat.requestPermissions(PersonMapActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
 
@@ -138,12 +180,25 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
 
-
-
     @Override
     protected void onStop() {
-
         super.onStop();
     }
+    final int LOCATION_REQUEST_CODE = 1;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case  LOCATION_REQUEST_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mapFragment.getMapAsync(this);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Разрешите приложению найти вас", Toast.LENGTH_LONG).show();
+                }
+                break;
+            }
 
+        }
     }
+}

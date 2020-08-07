@@ -4,6 +4,10 @@ apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.1"
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+    }
 
     defaultConfig {
         applicationId "com.example.dreamapp2"
