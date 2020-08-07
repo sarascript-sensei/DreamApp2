@@ -48,29 +48,15 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         com.google.android.gms.location.LocationListener {
     private GoogleMap mMap;
     Button MarkerChoiser, DescripMarker;
+    private LatLng pickupLocation;
     GoogleApiClient googleApiClient;
     private String personId;
     Location lastLocation;
     LocationRequest locationRequest;
-    private LatLng PersonPostion;
-    Marker VolunteerMarker;
-    final Context context = this;
-    private EditText result;
 
-    BitmapDescriptorFactory icon;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private DatabaseReference PersonDatabaseRef;
 
-    private DatabaseReference VolunteersRef;
 
     private ImageButton LogOutPerson;
-    private DatabaseReference VolunteersAvailableRef;
-    private DatabaseReference VolunteersLocationRef;
-    private int radius = 1;
-    private Boolean volunteerFound = false;
-    private String volunteerFoundID;
-    private LatLng helpLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,14 +64,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         setContentView(R.layout.activity_person_map);
 
         LogOutPerson = (FloatingActionButton) findViewById(R.id.LogOut);
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-
-        personId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        PersonDatabaseRef = FirebaseDatabase.getInstance().getReference().child("Person's Request");
-        VolunteersAvailableRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Available");
-        VolunteersLocationRef = FirebaseDatabase.getInstance().getReference().child("Volunteer Helping");
-
+        MarkerChoiser = (Button)findViewById(R.id.choise);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -94,43 +73,52 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         LogOutPerson.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAuth.signOut();
-                LogOutPerson();
+                FirebaseAuth.getInstance().signOut();
+                Intent welcomeIntent = new Intent(PersonMapActivity.this, WelcomeActivity.class);
+                startActivity(welcomeIntent);
+                finish();
+                return;
             }
         });
-        MarkerChoiser = (Button) findViewById(R.id.choise);
-        MarkerChoiser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Requests");
-                GeoFire geoFire = new GeoFire(ref);
-                geoFire.setLocation(userID, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
 
-                helpLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(helpLocation).title(""));
-            }
-        });
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        buildGoogleApiClient();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         buildGoogleApiClient();
         mMap.setMyLocationEnabled(true);
     }
+    protected synchronized void buildGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
 
+        googleApiClient.connect();
+    }
+        @Override
+        public void onLocationChanged(Location location) {
+            if (getApplicationContext() != null) {
+                lastLocation = location;
+
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+
+            }
+        }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         locationRequest = new LocationRequest();
         locationRequest.setInterval(1000);
         locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(locationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -149,37 +137,13 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        lastLocation = location;
 
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
 
-    }
-    protected synchronized void buildGoogleApiClient()
-    {
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        googleApiClient.connect();
-    }
 
     @Override
     protected void onStop() {
 
         super.onStop();
-    }
-    private void LogOutPerson() {
-        Intent welcomeIntent = new Intent(PersonMapActivity.this, WelcomeActivity.class);
-        startActivity(welcomeIntent);
-        finish();
-
-
     }
 
     }

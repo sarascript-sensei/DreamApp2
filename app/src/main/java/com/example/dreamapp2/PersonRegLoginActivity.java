@@ -107,8 +107,8 @@ public class PersonRegLoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    OnlinePersonID = mAuth.getCurrentUser().getUid();
-                    PersonDatabaseRef = FirebaseDatabase.getInstance().getReference()
+                    String OnlinePersonID = mAuth.getCurrentUser().getUid();
+                    DatabaseReference PersonDatabaseRef = FirebaseDatabase.getInstance().getReference()
                             .child("Users").child("Persons").child(OnlinePersonID);
                     PersonDatabaseRef.setValue(true);
 

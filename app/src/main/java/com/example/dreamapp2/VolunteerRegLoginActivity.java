@@ -107,8 +107,8 @@ public class VolunteerRegLoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    OnlineVolunteerID = mAuth.getCurrentUser().getUid();
-                    VolunteerDatabaseRef = FirebaseDatabase.getInstance().getReference()
+                    String OnlineVolunteerID = mAuth.getCurrentUser().getUid();
+                    DatabaseReference VolunteerDatabaseRef = FirebaseDatabase.getInstance().getReference()
                             .child("Users").child("Volunteers").child(OnlineVolunteerID);
                    VolunteerDatabaseRef.setValue(true);
 

@@ -6,19 +6,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -33,17 +26,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class VolunteerMapActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -51,18 +39,10 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         com.google.android.gms.location.LocationListener {
     private GoogleMap mMap;
     GoogleApiClient googleApiClient;
-    private String personId;
+
     Location lastLocation;
     LocationRequest locationRequest;
-    private LatLng PersonPostion;
-    Marker VolunteerMarker;
-    final Context context = this;
-    private EditText result;
 
-    BitmapDescriptorFactory icon;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private DatabaseReference PersonDatabaseRef;
 
     private ImageButton LogOutVolunteer;
 
@@ -72,8 +52,6 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         setContentView(R.layout.activity_volunteer_map);
 
         LogOutVolunteer = (FloatingActionButton) findViewById(R.id.LogOutVolunteer);
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
 
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -83,29 +61,49 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         LogOutVolunteer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAuth.signOut();
-                LogOutVolunteer();
+                FirebaseAuth.getInstance().signOut();
+                Intent welcomeIntent = new Intent(VolunteerMapActivity.this, WelcomeActivity.class);
+                startActivity(welcomeIntent);
+                finish();
+                return;
             }
         });
     }
 
-    private void LogOutVolunteer() {
-        Intent welcomeIntent = new Intent(VolunteerMapActivity.this, WelcomeActivity.class);
-        startActivity(welcomeIntent);
-        finish();
-    }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        buildGoogleApiClient();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         buildGoogleApiClient();
         mMap.setMyLocationEnabled(true);
+    }
+    protected synchronized void buildGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        googleApiClient.connect();
+    }
+    @Override
+    public void onLocationChanged(Location location) {
+        lastLocation = location;
+
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("VolunteersAvailable");
+
+        GeoFire geoFire = new GeoFire(ref);
+        geoFire.setLocation(userID, new GeoLocation(location.getLatitude(),location.getLongitude()));
     }
 
     @Override
@@ -113,7 +111,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         locationRequest = new LocationRequest();
         locationRequest.setInterval(1000);
         locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(locationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -132,38 +130,13 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
 
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        lastLocation = location;
-
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Volunteers Available");
-
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.setLocation(userID, new GeoLocation(location.getLatitude(),location.getLongitude()));
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        googleApiClient.connect();
-    }
-
 
     @Override
     protected void onStop() {
         super.onStop();
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Volunteers Available");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("VolunteersAvailable");
 
         GeoFire geoFire = new GeoFire(ref);
         geoFire.removeLocation(userID);
