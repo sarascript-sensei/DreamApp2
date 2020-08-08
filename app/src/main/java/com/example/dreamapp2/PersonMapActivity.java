@@ -97,17 +97,33 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                 builder.setTitle("Я нуждаюсь в ");
 
 // add a list
-                String[] animals = {"Продукты", "Лекарства", "СИЗ", "Попутка", "Помощь(SOS)"};
+                String[] animals = {"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
                 final MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(pickupLocation);
                 builder.setItems(animals, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
-                            case 0: markerOptions.position(pickupLocation).title("Продукты").icon(BitmapDescriptorFactory.fromResource(R.drawable.diet));
-                            case 1: markerOptions.position(pickupLocation).title("Лекарства").icon(BitmapDescriptorFactory.fromResource(R.drawable.medicine));
-                            case 2: markerOptions.position(pickupLocation).title("СИЗ").icon(BitmapDescriptorFactory.fromResource(R.drawable.oxygen));
-                            case 3: markerOptions.position(pickupLocation).title("Попутка").icon(BitmapDescriptorFactory.fromResource(R.drawable.car));
-                            case 4: markerOptions.position(pickupLocation).title("Помощь(SOS)").icon(BitmapDescriptorFactory.fromResource(R.drawable.diet));
+                            case 0:
+                                markerOptions.title("Лекарства").icon(BitmapDescriptorFactory.fromResource(R.drawable.medicine));
+                                mMap.addMarker(markerOptions);
+                                break;
+                            case 1:
+                                markerOptions.title("Продукты").icon(BitmapDescriptorFactory.fromResource(R.drawable.diet));
+                                mMap.addMarker(markerOptions);
+                                break;
+                            case 2:
+                                markerOptions.title("СИЗ").icon(BitmapDescriptorFactory.fromResource(R.drawable.oxygen));
+                                mMap.addMarker(markerOptions);
+                                break;
+                            case 3:
+                                markerOptions.title("Попутка").icon(BitmapDescriptorFactory.fromResource(R.drawable.car));
+                                mMap.addMarker(markerOptions);
+                                break;
+                            case 4:
+                                markerOptions.title("Помощь(SOS)").icon(BitmapDescriptorFactory.fromResource(R.drawable.help));
+                                mMap.addMarker(markerOptions);
+                                break;
                         }
                     }
                 });
