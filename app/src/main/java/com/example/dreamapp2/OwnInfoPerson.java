@@ -110,7 +110,7 @@ private  void getUserInfo() {
                     }
                     if(map.get("Проблема")!=null) {
                         mProblem = map.get("Проблема").toString();
-                        PhoneField.setText(mProblem);
+                        ProblemField.setText(mProblem);
                     }
                     if(map.get("Фотография")!=null) {
                         mProfileImage = map.get("profileImageUrl").toString();
@@ -138,7 +138,7 @@ private  void getUserInfo() {
         mPersonDatabase.updateChildren(userInfo);
 
         if (resultUri != null) {
-            StorageReference filePath = FirebaseStorage.getInstance().getReference().child("profile_images").child(userID);
+            StorageReference filePath = FirebaseStorage.getInstance().getReference().child("profileImageUrl").child(userID);
             Bitmap bitmap = null;
 
             try {

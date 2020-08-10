@@ -21,6 +21,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,7 +32,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -42,6 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +87,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         mPersonImage = (ImageView) findViewById(R.id.profileImage);
 
         mPersonName = (TextView) findViewById(R.id.personName);
-        mPersonPhone = (TextView) findViewById(R.id.personsPhone);
+        mPersonPhone = (TextView) findViewById(R.id.personPhone);
         mPersonProblem = (TextView) findViewById(R.id.personProblem);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -115,7 +120,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         getAssignedPerson();
     }
 
-    private void getAssignedPerson() {
+    private void getAssignedPerson(){
         String volunteerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference assignedPersonRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Volunteers").child(volunteerId).child("personHelpId");
         assignedPersonRef.addValueEventListener(new ValueEventListener() {
@@ -127,7 +132,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                         getAssignedPersonInfo();
                 }else {
                     personId = "";
-                    if(help)
+                    finish();
                 }
             }
 
@@ -147,24 +152,19 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                 if (snapshot.exists() && snapshot.getChildrenCount() > 0) {
                     Map<String, Object> map = (Map<String, Object>) snapshot.getValue();
                     if (map.get("Имя") != null) {
-                        mName = map.get("Имя").toString();
-                        NameField.setText(mName);
+                        mPersonName.setText(map.get("Имя").toString());
                     }
                     if (map.get("Номер") != null) {
-                        mPhone = map.get("Номер").toString();
-                        PhoneField.setText(mPhone);
+                        mPersonPhone.setText(map.get("Номер").toString());
                     }
                     if (map.get("Проблема") != null) {
-                        mProblem = map.get("Проблема").toString();
-                        PhoneField.setText(mProblem);
+                        mPersonProblem.setText(map.get("Проблема").toString());
                     }
-                    if (map.get("Фотография") != null) {
-                        mProfileImage = map.get("profileImageUrl").toString();
-                        Glide.with(getApplication()).load(mProfileImage).into(ProfilePhoto);
+                    if (map.get("profileImageUrl") != null) {
+                        Glide.with(getApplication()).load(map.get("profileImageUrl").toString()).into(mPersonImage);
                     }
 
                 }
-
             }
 
             @Override
@@ -302,10 +302,65 @@ private void getAssignedPersonPickUpLocation() {
                 }
                 break;
             }
-
         }
     }
-}
+            boolean getDriversAroundStarted = false;
 
+            List<Marker> markers = new ArrayList<Marker>();
+            private void getDriversAround(){
+                getDriversAroundStarted = true;
+                DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("personNeededHelp");
+
+                GeoFire geoFire = new GeoFire(driverLocation);
+                GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lastLocation.getLongitude(), lastLocation.getLatitude()), 999999999);
+
+                geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                    @Override
+                    public void onKeyEntered(String key, GeoLocation location) {
+
+                        for(Marker markerIt : markers){
+                            if(markerIt.getTag().equals(key))
+                                return;
+                        }
+
+                        LatLng driverLocation = new LatLng(location.latitude, location.longitude);
+
+                        Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.oxygen)));
+                        mDriverMarker.setTag(key);
+
+                        markers.add(mDriverMarker);
+
+
+                    }
+
+                    @Override
+                    public void onKeyExited(String key) {
+                        for(Marker markerIt : markers){
+                            if(markerIt.getTag().equals(key)){
+                                markerIt.remove();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onKeyMoved(String key, GeoLocation location) {
+                        for(Marker markerIt : markers){
+                            if(markerIt.getTag().equals(key)){
+                                markerIt.setPosition(new LatLng(location.latitude, location.longitude));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onGeoQueryReady() {
+                    }
+
+                    @Override
+                    public void onGeoQueryError(DatabaseError error) {
+
+                    }
+                });
+            }
+        }
 
 

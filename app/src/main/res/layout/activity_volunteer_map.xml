@@ -15,21 +15,33 @@
         android:layout_height="100sp"
         android:id="@+id/personProfileImage"/>
     <include layout="@layout/toolbox3"/>
+                    <Switch
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Working"
+                        android:layout_marginLeft="300dp"
+                        android:layout_marginTop="40dp"
+                        android:id="@+id/workingSwitch"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:background="@android:color/white"
         android:id="@+id/personInfo"
-        android:layout_gravity="bottom">
-
-        <ImageView
-            android:layout_width="100sp"
-            android:layout_height="100sp"
-            android:id="@+id/personImage"
-            android:src="@mipmap/user"
-            android:padding="20sp"/>
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:visibility="gone"
+        android:elevation="1dp"
+        android:translationZ="1dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="100sp"
+                android:layout_height="100sp"
+                android:id="@+id/personImage"
+                android:src="@mipmap/user"
+                android:padding="20sp"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,53 +52,20 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/personName"
                     android:paddingBottom="10sp"
-                    android:paddingTop = "20sp"/>
+                    android:paddingTop="20sp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/personsPhone"
+                    android:id="@+id/personPhone"
                     android:paddingBottom="10sp"
-                    android:paddingTop = "20sp"/>
-
+                    android:paddingTop="20sp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/personProblem"
                     android:paddingBottom="10sp"
-                    android:paddingTop = "20sp"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <Button
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/logout"
-                            android:text="logout"/>
-                        <Button
-                            android:layout_weight="1"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/history"
-                            android:text="history"/>
-                        <Button
-                            android:layout_weight="1"
-                            android:layout_gravity="end"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/settings"
-                            android:text="Settings"/>
-                    </LinearLayout>
-                    <Switch
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Working"
-                        android:layout_margin="10sp"
-                        android:id="@+id/workingSwitch"/>
-                </LinearLayout>
+                    android:paddingTop="20sp"/>
+            </LinearLayout>
+        </LinearLayout>
             </LinearLayout>
 </FrameLayout>
