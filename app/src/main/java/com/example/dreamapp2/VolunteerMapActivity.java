@@ -3,18 +3,23 @@ package com.example.dreamapp2;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
-import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,13 +31,15 @@ import com.firebase.geofire.GeoQueryEventListener;
 import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -44,7 +51,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +65,8 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     GoogleApiClient googleApiClient;
     private SupportMapFragment mapFragment;
     private LinearLayout mPersonInfo;
+    private LatLng pickupLocation;
+    private FusedLocationProviderClient mFusedLocationClient;
 
     private ImageView mPersonImage;
 
@@ -69,9 +77,10 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
 
     FloatingActionButton Community;
     private String personId = "";
-
+    private Marker pickupMarker;
 
     private ImageButton LogOutVolunteer;
+    private Switch mWorkingSwitch;
 
 
     @Override
@@ -85,6 +94,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         mPersonInfo = (LinearLayout) findViewById(R.id.personInfo);
 
         mPersonImage = (ImageView) findViewById(R.id.profileImage);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mPersonName = (TextView) findViewById(R.id.personName);
         mPersonPhone = (TextView) findViewById(R.id.personPhone);
@@ -109,6 +119,18 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                 return;
             }
         });
+        mWorkingSwitch = (Switch) findViewById(R.id.workingSwitch);
+        mWorkingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    connectVolunteer();
+
+                }else{
+                    disconnectDriver();
+                }
+            }
+        });
         Community.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,8 +138,55 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                 startActivity(communityIntent);
             }
         });
-
         getAssignedPerson();
+        getClosestPerson();
+        pickupLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation));
+    }
+    private int radius = 1;
+    private Boolean personFound = false;
+    private String personfoundID;
+
+    private void getClosestPerson() {
+        DatabaseReference personLocation = FirebaseDatabase.getInstance().getReference().child("personRequest");
+
+        GeoFire geoFire = new GeoFire(personLocation);
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
+        geoQuery.removeAllListeners();
+
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                if(!personFound) {
+                    personFound = true;
+                    personfoundID = key;
+                }
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                if (!personFound) {
+                    radius++;
+                    getClosestPerson();
+                }
+            }
+
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
     }
 
     private void getAssignedPerson(){
@@ -205,13 +274,101 @@ private void getAssignedPersonPickUpLocation() {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(VolunteerMapActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(1000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+
+            }else{
+                checkLocationPermission();
+            }
         }
-        buildGoogleApiClient();
+
+        mFusedLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.myLooper());
         mMap.setMyLocationEnabled(true);
+        buildGoogleApiClient();
+    }
+    LocationCallback mLocationCallback = new LocationCallback(){
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            for(Location location : locationResult.getLocations()){
+                if(getApplicationContext()!=null){
+                    lastLocation = location;
+
+                    LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+
+                    //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    //mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                    if(!getVolunteersAroundStarted)
+                        getVolunteersAround();
+                }
+            }
+        }
+    };
+    //Где волонтёр
+    private  Marker PersonMarker;
+    private void getVolunteerLocation () {
+        DatabaseReference volunteerLocationRef = FirebaseDatabase.getInstance().getReference().child("personpicked").child(personfoundID).child("l");
+        volunteerLocationRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    List <Object> map = (List<Object>) snapshot.getValue();
+                    double locationLat = 0;
+                    double locationLng = 0;
+                    if(map.get(0) != null){
+                        locationLat = Double.parseDouble(map.get(1).toString());
+                    }
+                    if (map.get(1) != null) {
+                        locationLng = Double.parseDouble(map.get(1).toString());
+                    }
+                    LatLng personLatLng = new LatLng(locationLat, locationLng);
+                    if(PersonMarker != null) {
+                        PersonMarker.remove();
+                    }
+                    Location loc1 = new Location(" ");
+                    loc1.setLatitude(pickupLocation.latitude);
+                    loc1.setLongitude(pickupLocation.longitude);
+
+                    Location loc2 = new Location(" ");
+                    loc2.setLatitude(personLatLng.latitude);
+                    loc2.setLongitude(personLatLng.longitude);
+
+                    PersonMarker = mMap.addMarker(new MarkerOptions().position(personLatLng).title("Волонтёр"));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
+
+    private void checkLocationPermission() {
+        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new android.app.AlertDialog.Builder(this)
+                        .setTitle("give permission")
+                        .setMessage("give permission message")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ActivityCompat.requestPermissions(VolunteerMapActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                            }
+                        })
+                        .create()
+                        .show();
+            }
+            else{
+                ActivityCompat.requestPermissions(VolunteerMapActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        }
+    }
     protected synchronized void buildGoogleApiClient() {
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -304,14 +461,36 @@ private void getAssignedPersonPickUpLocation() {
             }
         }
     }
-            boolean getDriversAroundStarted = false;
+
+    private void connectVolunteer(){
+        checkLocationPermission();
+        mFusedLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.myLooper());
+        mMap.setMyLocationEnabled(true);
+    }
+
+    private void disconnectDriver(){
+        if(mFusedLocationClient != null){
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        }
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("driversAvailable");
+
+        GeoFire geoFire = new GeoFire(ref);
+        geoFire.removeLocation(userId);
+    }
+
+
+
+
+
+    //Волонтёр видит все маркеры
+            boolean getVolunteersAroundStarted = false;
 
             List<Marker> markers = new ArrayList<Marker>();
-            private void getDriversAround(){
-                getDriversAroundStarted = true;
-                DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("personNeededHelp");
+            private void getVolunteersAround(){
+                DatabaseReference personLocation = FirebaseDatabase.getInstance().getReference().child("personRequest");
 
-                GeoFire geoFire = new GeoFire(driverLocation);
+                GeoFire geoFire = new GeoFire(personLocation);
                 GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lastLocation.getLongitude(), lastLocation.getLatitude()), 999999999);
 
                 geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -323,12 +502,12 @@ private void getAssignedPersonPickUpLocation() {
                                 return;
                         }
 
-                        LatLng driverLocation = new LatLng(location.latitude, location.longitude);
+                        LatLng personLocation = new LatLng(location.latitude, location.longitude);
 
-                        Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.oxygen)));
-                        mDriverMarker.setTag(key);
+                        Marker mPersonMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key));
+                        mPersonMarker.setTag(key);
 
-                        markers.add(mDriverMarker);
+                        markers.add(mPersonMarker);
 
 
                     }

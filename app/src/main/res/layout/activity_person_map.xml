@@ -14,6 +14,7 @@
 
 <include layout="@layout/toolbox2"/>
 <include layout="@layout/toolbox"/>
-    <include layout="@layout/android_user_input_dialog"/>
+
+    <include layout="@layout/android_user_input_dialog" />
 
 </RelativeLayout>

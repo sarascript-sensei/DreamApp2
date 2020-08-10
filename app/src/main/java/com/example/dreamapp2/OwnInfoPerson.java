@@ -112,7 +112,7 @@ private  void getUserInfo() {
                         mProblem = map.get("Проблема").toString();
                         ProblemField.setText(mProblem);
                     }
-                    if(map.get("Фотография")!=null) {
+                    if(map.get("profileImageUrl")!=null) {
                         mProfileImage = map.get("profileImageUrl").toString();
                         Glide.with(getApplication()).load(mProfileImage).into(ProfilePhoto);
                     }

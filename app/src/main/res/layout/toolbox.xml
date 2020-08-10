@@ -6,14 +6,6 @@ android:layout_height="match_parent">
 
 
     <Button
-        android:id="@+id/descript"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Описание Маркера"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"/>
-
-    <Button
         android:id="@+id/choise"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -40,11 +40,14 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,13 +60,16 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     private SupportMapFragment mapFragment;
     private GoogleMap mMap;
     GoogleApiClient googleApiClient;
-
+    DatabaseReference mPersonMarker;
     Location lastLocation;
     FloatingActionButton OwnInfoUser;
     LocationRequest locationRequest;
-    private Button MarkerChoise, Descript;
+    private Button MarkerChoise;
 
-
+    private  FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
+    private DatabaseReference PersonDatabase;
+    private String userID;
     private ImageButton LogOut;
     private LatLng pickupLocation;
 
@@ -75,8 +81,9 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
         LogOut = (FloatingActionButton) findViewById(R.id.LogOut);
         MarkerChoise = (Button) findViewById(R.id.choise);
-        Descript = (Button) findViewById(R.id.descript);
-        OwnInfoUser = (FloatingActionButton) findViewById(R.id.OwnInfo);
+                OwnInfoUser = (FloatingActionButton) findViewById(R.id.OwnInfo);
+                userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                PersonDatabase = FirebaseDatabase.getInstance().getReference().child("personRequest");
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -109,9 +116,9 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
             public void onClick(View view) {
                 String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("personRequest");
-                GeoFire geoFire = new GeoFire(ref);
+                GeoFire geoFire = new GeoFire(PersonDatabase);
                 geoFire.setLocation(userId, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
+
 
                 pickupLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 AlertDialog.Builder builder = new AlertDialog.Builder(PersonMapActivity.this);
@@ -157,109 +164,10 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 // create and show the alert dialog
                 AlertDialog dialog = builder.create();
                 dialog.show();
-                //Код, который ищет волонтёра рядом (поддаётся изменениям)
-                getClosestVolunteer();
             }
         });
     }
 
-    private  int radius = 1;
-    private  Boolean volunteerFound = false;
-    private String volunteerFoundID;
-    private void getClosestVolunteer (){
-        DatabaseReference volunteersLocation = FirebaseDatabase.getInstance().getReference().child("VolunteersAvailable");
-
-        GeoFire geofire = new GeoFire(volunteersLocation);
-
-        GeoQuery geoQuery = geofire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
-        geoQuery.removeAllListeners();
-        //Какой из волонтёров будет выбран
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                if(!volunteerFound) {
-                    volunteerFound = true;
-                    volunteerFoundID = key;
-
-                    DatabaseReference volunteerRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Volunteers").child(volunteerFoundID);
-                    String personId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    HashMap map = new HashMap();
-                    map.put("personHelpId", personId);
-                    volunteerRef.updateChildren(map);
-
-                    getVolunteerLocation();
-                    MarkerChoise.setText("Поиск волонтёра...");
-
-                }
-            }
-
-            @Override
-            public void onKeyExited(String key) {
-
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-                if (!volunteerFound) {
-                    radius++;
-                    getClosestVolunteer();
-                }
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-
-            }
-        });
-    }
-
-    //Где волонтёр
-    private  Marker VolunteerMarker;
-    private void getVolunteerLocation () {
-        DatabaseReference volunteerLocationRef = FirebaseDatabase.getInstance().getReference().child("volunteersHelping").child(volunteerFoundID).child("l");
-        volunteerLocationRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    List <Object> map = (List<Object>) snapshot.getValue();
-                    double locationLat = 0;
-                    double locationLng = 0;
-                    MarkerChoise.setText("Волонтёр найден");
-                    if(map.get(0) != null){
-                        locationLat = Double.parseDouble(map.get(1).toString());
-                    }
-                    if (map.get(1) != null) {
-                        locationLng = Double.parseDouble(map.get(1).toString());
-                    }
-                    LatLng volunteerLatLng = new LatLng(locationLat, locationLng);
-                    if(VolunteerMarker != null) {
-                        VolunteerMarker.remove();
-                    }
-                    Location loc1 = new Location(" ");
-                    loc1.setLatitude(pickupLocation.latitude);
-                    loc1.setLongitude(pickupLocation.longitude);
-
-                    Location loc2 = new Location(" ");
-                    loc2.setLatitude(volunteerLatLng.latitude);
-                    loc2.setLongitude(volunteerLatLng.longitude);
-
-                    float distance = loc1.distanceTo(loc2);
-                    VolunteerMarker = mMap.addMarker(new MarkerOptions().position(volunteerLatLng).title("Волонтёр"));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
 
 
     @Override
@@ -290,7 +198,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
 
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("VolunteersAvailable");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("personRequest");
 
         GeoFire geoFire = new GeoFire(ref);
         geoFire.setLocation(userID, new GeoLocation(location.getLatitude(),location.getLongitude()));
@@ -329,17 +237,12 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case  LOCATION_REQUEST_CODE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mapFragment.getMapAsync(this);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "Разрешите приложению найти вас", Toast.LENGTH_LONG).show();
-                }
-                break;
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mapFragment.getMapAsync(this);
+            } else {
+                Toast.makeText(getApplicationContext(), "Разрешите приложению найти вас", Toast.LENGTH_LONG).show();
             }
-
         }
     }
 }

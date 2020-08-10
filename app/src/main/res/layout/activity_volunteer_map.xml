@@ -15,6 +15,10 @@
         android:layout_height="100sp"
         android:id="@+id/personProfileImage"/>
     <include layout="@layout/toolbox3"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"/>
                     <Switch
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -64,7 +68,14 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/personProblem"
                     android:paddingBottom="10sp"
-                    android:paddingTop="20sp"/>
+                    android:paddingTop="20sp" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="180dp"
+                    android:text="Помочь"/>
+
+
             </LinearLayout>
         </LinearLayout>
             </LinearLayout>
