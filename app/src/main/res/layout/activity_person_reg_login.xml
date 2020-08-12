@@ -1,116 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="@drawable/background"
-tools:context=".PersonRegLoginActivity">
-
-    <TextView
-        android:id="@+id/karta"
-        android:layout_width="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PersonRegLoginActivity"
+    android:orientation="vertical">
+    <EditText
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:text="@string/app_in_name"
-        android:textColor="@color/ColorOrange"
-        android:textSize="35sp"
-        android:textStyle="italic" />
-
-    <TextView
-        android:id="@+id/wish"
-        android:layout_width="wrap_content"
+        android:hint="email"
+        android:inputType="textEmailAddress"
+        android:id="@+id/email"/>
+    <EditText
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/karta"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="45dp"
-        android:letterSpacing="0.05"
-        android:text="@string/app_in_after"
-        android:textColor="@color/ColorOrange"
-        android:textSize="70sp"
-        android:textStyle="italic" />
-
-    <TextView
-        android:id="@+id/StatusPerson"
-        android:layout_width="wrap_content"
+        android:hint="password"
+        android:inputType="textPassword"
+        android:id="@+id/password"/>
+    <Button
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/wish"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="27dp"
-        android:text="Вход для пользователей"
-        android:textColor="#ffff"
-        android:textSize="18sp" />
-
-<EditText
-    android:id="@+id/personEmail"
-    android:layout_width="280dp"
-    android:textColorHint="#fff"
-    android:layout_marginLeft="50dp"
-    android:gravity="center"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/StatusPerson"
-    android:layout_marginTop="30dp"
-    android:ems="10"
-    android:textColor="#fff"
-    android:hint="Введите вашу почту"
-    android:inputType="textEmailAddress"/>
-
-<EditText
-    android:id="@+id/PersonPassword"
-    android:layout_marginLeft="50dp"
-    android:textColorHint="#fff"
-    android:layout_width="280dp"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/personEmail"
-    android:layout_marginTop="10dp"
-    android:textColor="#ffff"
-    android:ems="10"
-    android:gravity="center"
-    android:hint="Введите ваш пароль"
-    android:inputType="textPassword" />
-
-<Button
-    android:id="@+id/btnSingIn"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerHorizontal="true"
-    android:layout_marginTop="10dp"
-    android:clickable="true"
-    android:textColor="#ffff"
-    android:layout_below="@id/PersonPassword"
-    android:background="@drawable/btn_sign_in"
-    android:text="@string/bottom_1" />
-
-<Button
-    android:id="@+id/btnRegisterPerson"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerHorizontal="true"
-    android:textColor="#ffff"
-    android:layout_marginTop="30dp"
-    android:layout_below="@id/btnSingIn"
-    android:background="@drawable/btn_sign_in"
-    android:text="@string/bottom_2"
-    android:layout_marginBottom="@android:dimen/app_icon_size"/>
-<TextView
-    android:id="@+id/questionPerson"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/TextView3"
-    android:textStyle="bold"
-    android:layout_centerHorizontal="true"
-    android:layout_below="@+id/btnSingIn"
-    android:layout_marginTop="5dp"/>
-
-<ImageView
-    android:id="@+id/imageView"
-    android:layout_width="35sp"
-    android:layout_height="120sp"
-    android:layout_below="@+id/karta"
-    android:layout_marginLeft="135dp"
-    android:rotation="42"
-    app:srcCompat="@drawable/lenta" />
-
-</RelativeLayout>
+        android:text="login"
+        android:id="@+id/login"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="registration"
+        android:id="@+id/registration"/>
+</LinearLayout>

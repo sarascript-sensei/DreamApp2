@@ -1,130 +1,102 @@
 package com.example.dreamapp2;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class PersonRegLoginActivity extends AppCompatActivity {
-    TextView StatusPerson, questionPerson;
-    Button btnRegisterPerson, btnSingIn;
-    EditText emailET, passwordET;
-    FirebaseAuth mAuth;
-    ProgressDialog loadingBar;
-    DatabaseReference PersonDatabaseRef;
-    String OnlinePersonID;
+    private EditText mEmail, mPassword;
+    private Button mLogin, mRegistration;
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener firebaseAuthListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_reg_login);
 
-        StatusPerson = (TextView) findViewById(R.id.StatusPerson);
-        questionPerson = (TextView) findViewById(R.id.questionPerson);
-        btnSingIn = (Button) findViewById(R.id.btnSingIn);
-        btnRegisterPerson = (Button) findViewById(R.id.btnRegisterPerson);
-        emailET = (EditText) findViewById(R.id.personEmail);
-        passwordET = (EditText) findViewById(R.id.PersonPassword);
-
         mAuth = FirebaseAuth.getInstance();
 
-        loadingBar = new ProgressDialog(this);
+        firebaseAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if(user!=null){
+                    Intent intent = new Intent(PersonRegLoginActivity.this, PersonMapActivity.class);
+                    startActivity(intent);
+                    finish();
+                    return;
+                }
+            }
+        };
 
-        btnRegisterPerson.setVisibility(View.INVISIBLE);
-        btnRegisterPerson.setEnabled(false);
+        mEmail = (EditText) findViewById(R.id.email);
+        mPassword = (EditText) findViewById(R.id.password);
 
-        questionPerson.setOnClickListener(new View.OnClickListener() {
+        mLogin = (Button) findViewById(R.id.login);
+        mRegistration = (Button) findViewById(R.id.registration);
+
+        mRegistration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnSingIn.setVisibility(View.INVISIBLE);
-                questionPerson.setVisibility(View.INVISIBLE);
-                btnRegisterPerson.setVisibility(View.VISIBLE);
-                btnRegisterPerson.setEnabled(true);
-                StatusPerson.setText("Регистрация для пользователей");
+                final String email = mEmail.getText().toString();
+                final String password = mPassword.getText().toString();
+                mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(PersonRegLoginActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(!task.isSuccessful()){
+                            Toast.makeText(PersonRegLoginActivity.this, "sign up error", Toast.LENGTH_SHORT).show();
+                        }else{
+                            String user_id = mAuth.getCurrentUser().getUid();
+                            DatabaseReference current_user_db = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(user_id);
+                            current_user_db.setValue(email);
+                        }
+                    }
+                });
             }
         });
-        btnRegisterPerson.setOnClickListener(new View.OnClickListener() {
+
+        mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                String email = emailET.getText().toString();
-                String password = passwordET.getText().toString();
+            public void onClick(View v) {
+                final String email = mEmail.getText().toString();
+                final String password = mPassword.getText().toString();
+                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(PersonRegLoginActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(!task.isSuccessful()){
+                            Toast.makeText(PersonRegLoginActivity.this, "sign in error", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
-                RegisterPerson(email, password);
-            }
-        });
-
-        btnSingIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String email = emailET.getText().toString();
-                String password = passwordET.getText().toString();
-
-                SignInPerson(email, password);
             }
         });
     }
 
-    private void SignInPerson(String email, String password) {
-        loadingBar.setTitle("Вход пользователя");
-        loadingBar.setMessage("Пожалуйста, подождите");
-        loadingBar.show();
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(PersonRegLoginActivity.this, "Успешный вход", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
-                    Intent personIntent = new Intent (PersonRegLoginActivity.this, PersonMapActivity.class);
-                    startActivity(personIntent);
-                }
-                else {
-                    Toast.makeText(PersonRegLoginActivity.this, "Произошла ошибка, попробуйте снова", Toast.LENGTH_SHORT).show();
-                }
-                loadingBar.dismiss();
-            }
-        });
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(firebaseAuthListener);
     }
-
-    private void RegisterPerson(String email, String password) {
-        loadingBar.setTitle("Регистрация пользователя");
-        loadingBar.setMessage("Пожалуйста, подождите");
-        loadingBar.show();
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    String OnlinePersonID = mAuth.getCurrentUser().getUid();
-                    DatabaseReference PersonDatabaseRef = FirebaseDatabase.getInstance().getReference()
-                            .child("Users").child("Persons").child(OnlinePersonID);
-                    PersonDatabaseRef.setValue(true);
-
-                    Intent personIntent = new Intent (PersonRegLoginActivity.this, PersonMapActivity.class);
-                    startActivity(personIntent);
-
-                    Toast.makeText(PersonRegLoginActivity.this, "Регистрация прошла успещно", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
-
-
-                }
-                else {
-                    Toast.makeText(PersonRegLoginActivity.this, "Ошибка", Toast.LENGTH_SHORT).show();
-                }
-                loadingBar.dismiss();
-            }
-        });
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAuth.removeAuthStateListener(firebaseAuthListener);
     }
 }

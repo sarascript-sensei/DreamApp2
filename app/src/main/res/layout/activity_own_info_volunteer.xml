@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".OwnInfoPerson"
+    tools:context=".OwnInfoVolunteer"
     android:orientation="vertical"
     android:padding="20sp">
     <ImageView
@@ -21,13 +21,6 @@
         android:hint="Name"
         android:layout_marginBottom="20sp"/>
     <EditText
-        android:id="@+id/customerProblem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:hint="Problem"
-        android:layout_marginBottom="20sp"/>
-    <EditText
         android:id="@+id/phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,6 +28,35 @@
         android:hint="Phone"
         android:layout_marginBottom="20sp"
         android:inputType="number"/>
+    <EditText
+        android:id="@+id/car"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:hint="Car"
+        android:layout_marginBottom="20sp"/>
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/radioGroup"
+        android:orientation="horizontal">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UberX"
+            android:id="@+id/UberX"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UberBlack"
+            android:id="@+id/UberBlack"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UberXl"
+            android:id="@+id/UberXl"/>
+    </RadioGroup>
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

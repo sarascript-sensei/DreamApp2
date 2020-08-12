@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,43 +35,49 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OwnInfoPerson extends AppCompatActivity {
+public class OwnInfoVolunteer extends AppCompatActivity {
 
-    private EditText mNameField, mPhoneField, mProblemField;
+    private EditText mNameField, mPhoneField, mCommunityField;
 
     private Button mBack, mConfirm;
 
     private ImageView mProfileImage;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mCustomerDatabase;
+    private DatabaseReference mDriverDatabase;
 
     private String userID;
     private String mName;
     private String mPhone;
+    private String mCommunity;
+    private String mService;
     private String mProfileImageUrl;
-    private String mProblem;
 
     private Uri resultUri;
+
+    private RadioGroup mRadioGroup;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_own_info_person);
+        setContentView(R.layout.activity_own_info_volunteer);
+
 
         mNameField = (EditText) findViewById(R.id.name);
         mPhoneField = (EditText) findViewById(R.id.phone);
-        mProblemField = (EditText) findViewById(R.id.customerProblem);
+        mCommunityField = (EditText) findViewById(R.id.car);
 
         mProfileImage = (ImageView) findViewById(R.id.profileImage);
+
+        mRadioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 
         mBack = (Button) findViewById(R.id.back);
         mConfirm = (Button) findViewById(R.id.confirm);
 
         mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
-        mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(userID);
+        mDriverDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(userID);
 
         getUserInfo();
 
@@ -98,7 +106,7 @@ public class OwnInfoPerson extends AppCompatActivity {
         });
     }
     private void getUserInfo(){
-        mCustomerDatabase.addValueEventListener(new ValueEventListener() {
+        mDriverDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists() && dataSnapshot.getChildrenCount()>0){
@@ -111,9 +119,23 @@ public class OwnInfoPerson extends AppCompatActivity {
                         mPhone = map.get("phone").toString();
                         mPhoneField.setText(mPhone);
                     }
-                    if(map.get("problem")!=null){
-                        mProblem = map.get("problem").toString();
-                        mProblemField.setText(mProblem);
+                    if(map.get("community")!=null){
+                        mCommunity = map.get("community").toString();
+                        mCommunityField.setText(mCommunity);
+                    }
+                    if(map.get("service")!=null){
+                        mService = map.get("service").toString();
+                        switch (mService){
+                            case"UberX":
+                                mRadioGroup.check(R.id.UberX);
+                                break;
+                            case"UberBlack":
+                                mRadioGroup.check(R.id.UberBlack);
+                                break;
+                            case"UberXl":
+                                mRadioGroup.check(R.id.UberXl);
+                                break;
+                        }
                     }
                     if(map.get("profileImageUrl")!=null){
                         mProfileImageUrl = map.get("profileImageUrl").toString();
@@ -133,13 +155,24 @@ public class OwnInfoPerson extends AppCompatActivity {
     private void saveUserInformation() {
         mName = mNameField.getText().toString();
         mPhone = mPhoneField.getText().toString();
-        mProblem = mProblemField.getText().toString();
+        mCommunity = mCommunityField.getText().toString();
+
+        int selectId = mRadioGroup.getCheckedRadioButtonId();
+
+        final RadioButton radioButton = (RadioButton) findViewById(selectId);
+
+        if (radioButton.getText() == null){
+            return;
+        }
+
+        mService = radioButton.getText().toString();
 
         Map userInfo = new HashMap();
         userInfo.put("name", mName);
         userInfo.put("phone", mPhone);
-        userInfo.put("problem", mProblem);
-        mCustomerDatabase.updateChildren(userInfo);
+        userInfo.put("community", mCommunity);
+        userInfo.put("service", mService);
+        mDriverDatabase.updateChildren(userInfo);
 
         if(resultUri != null) {
 
@@ -170,7 +203,7 @@ public class OwnInfoPerson extends AppCompatActivity {
 
                     Map newImage = new HashMap();
                     newImage.put("profileImageUrl", downloadUrl.toString());
-                    mCustomerDatabase.updateChildren(newImage);
+                    mDriverDatabase.updateChildren(newImage);
 
                     finish();
                     return;
