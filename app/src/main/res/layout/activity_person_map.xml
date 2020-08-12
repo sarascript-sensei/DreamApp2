@@ -107,25 +107,35 @@
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="UberX"
-                    android:id="@+id/UberX"/>
+                    android:text="Попутка"
+                    android:id="@+id/carneeded"/>
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="UberBlack"
-                    android:id="@+id/UberBlack"/>
+                    android:text="Лекарства"
+                    android:id="@+id/medicine"/>
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="UberXl"
-                    android:id="@+id/UberXl"/>
+                    android:text="SOS"
+                    android:id="@+id/help"/>
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="СИЗ"
+                    android:id="@+id/oxygen"/>
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Продукты"
+                    android:id="@+id/food"/>
             </RadioGroup>
 
             <Button
                 android:layout_gravity="bottom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="call Uber"
+                android:text="Мне нужна помощь"
                 android:id="@+id/request"/>
         </LinearLayout>
     </LinearLayout>

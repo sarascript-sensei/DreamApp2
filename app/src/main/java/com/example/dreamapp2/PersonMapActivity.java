@@ -108,7 +108,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
             mRatingBar = (RatingBar) findViewById(R.id.ratingBar);
 
             mRadioGroup = (RadioGroup) findViewById(R.id.radioGroup);
-            mRadioGroup.check(R.id.UberX);
+            mRadioGroup.check(R.id.oxygen);
 
             mLogout = (Button) findViewById(R.id.logout);
             mRequest = (Button) findViewById(R.id.request);
@@ -154,7 +154,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                         if (mDriverMarker != null){
                             mDriverMarker.remove();
                         }
-                        mRequest.setText("call Uber");
+                        mRequest.setText("Мне нужна помощь");
 
                         mDriverInfo.setVisibility(View.GONE);
                         mDriverName.setText("");
@@ -182,11 +182,11 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
                         GeoFire geoFire = new GeoFire(ref);
                         geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
-
                         pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+
                         pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
 
-                        mRequest.setText("Getting your Driver....");
+                        mRequest.setText("В поисках волонтёра...");
 
                         getClosestDriver();
                     }
@@ -331,10 +331,6 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
                         loc2.setLatitude(driverLatLng.latitude);
                         loc2.setLongitude(driverLatLng.longitude);
 
-                        float distance = loc1.distanceTo(loc2);
-
-
-                            mRequest.setText("Driver Found: " + String.valueOf(distance));
 
 
 
@@ -519,7 +515,7 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     LatLng driverLocation = new LatLng(location.latitude, location.longitude);
 
-                    Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)));
+                    Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero)));
                     mDriverMarker.setTag(key);
 
                     markers.add(mDriverMarker);

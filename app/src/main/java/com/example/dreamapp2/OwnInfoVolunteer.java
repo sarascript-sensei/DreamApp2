@@ -126,14 +126,17 @@ public class OwnInfoVolunteer extends AppCompatActivity {
                     if(map.get("service")!=null){
                         mService = map.get("service").toString();
                         switch (mService){
-                            case"UberX":
-                                mRadioGroup.check(R.id.UberX);
+                            case"carneeded":
+                                mRadioGroup.check(R.id.carneeded);
                                 break;
-                            case"UberBlack":
-                                mRadioGroup.check(R.id.UberBlack);
+                            case"medicine":
+                                mRadioGroup.check(R.id.medicine);
                                 break;
-                            case"UberXl":
-                                mRadioGroup.check(R.id.UberXl);
+                            case"help":
+                                mRadioGroup.check(R.id.help);
+                                break;
+                            case"oxygen":
+                                mRadioGroup.check(R.id.oxygen);
                                 break;
                         }
                     }
