@@ -54,7 +54,7 @@ tools:context=".VolunteerMapActivity" >
     android:layout_gravity="bottom"
     android:orientation="vertical"
     android:background="@android:color/white"
-    android:visibility="gone"
+    android:visibility="visible"
     android:elevation="1dp"
     android:translationZ="1dp">
     <LinearLayout
@@ -95,7 +95,7 @@ tools:context=".VolunteerMapActivity" >
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="picked customer"
+        android:text="Помочь"
         android:id="@+id/rideStatus"/>
 
 

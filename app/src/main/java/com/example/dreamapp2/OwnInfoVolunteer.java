@@ -123,23 +123,6 @@ public class OwnInfoVolunteer extends AppCompatActivity {
                         mCommunity = map.get("community").toString();
                         mCommunityField.setText(mCommunity);
                     }
-                    if(map.get("service")!=null){
-                        mService = map.get("service").toString();
-                        switch (mService){
-                            case"carneeded":
-                                mRadioGroup.check(R.id.carneeded);
-                                break;
-                            case"medicine":
-                                mRadioGroup.check(R.id.medicine);
-                                break;
-                            case"help":
-                                mRadioGroup.check(R.id.help);
-                                break;
-                            case"oxygen":
-                                mRadioGroup.check(R.id.oxygen);
-                                break;
-                        }
-                    }
                     if(map.get("profileImageUrl")!=null){
                         mProfileImageUrl = map.get("profileImageUrl").toString();
                         Glide.with(getApplication()).load(mProfileImageUrl).into(mProfileImage);
@@ -168,7 +151,7 @@ public class OwnInfoVolunteer extends AppCompatActivity {
             return;
         }
 
-        mService = radioButton.getText().toString();
+
 
         Map userInfo = new HashMap();
         userInfo.put("name", mName);
