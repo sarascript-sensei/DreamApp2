@@ -67,7 +67,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
 
     private int status = 0;
 
-    private String customerId = "", destination;
+    private String customerId = "";
     private LatLng destinationLatLng, pickupLatLng;
     private float rideDistance;
 
@@ -300,11 +300,9 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         public void onLocationResult(LocationResult locationResult) {
             for (Location location : locationResult.getLocations()) {
                 if (getApplicationContext() != null) {
-
-                    if (!customerId.equals("") && mLastLocation != null && location != null) {
-                        rideDistance += mLastLocation.distanceTo(location) / 1000;
-                    }
                     mLastLocation = location;
+                    }
+
 
 
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
@@ -328,9 +326,10 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                             geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
                             break;
                     }
+                    if (!getDriversAroundStarted)
+                        getDriversAround();
                 }
             }
-        }
     };
 
     private void checkLocationPermission() {
@@ -400,28 +399,78 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
-            public void onKeyEntered(String key, GeoLocation location) {
+            public void onKeyEntered(final String key, GeoLocation location) {
+                final LatLng personLocation = new LatLng(location.latitude, location.longitude);
+
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+                DatabaseReference uidRef = rootRef.child(uid);
+
+                ValueEventListener valueEventListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.child("service").getValue(String.class).equals("carneeded")) {
+                            mMap.clear();
+                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero)));
+                            mDriverMarker.setTag(key);
+
+                            markers.add(mDriverMarker);
+                        }
+                        if (dataSnapshot.child("service").getValue(String.class).equals("carneeded")) {
+                            mMap.clear();
+                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero)));
+                            mDriverMarker.setTag(key);
+
+                            markers.add(mDriverMarker);
+                        }
+                        if (dataSnapshot.child("service").getValue(String.class).equals("medicine")) {
+                            mMap.clear();
+                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine)));
+                            mDriverMarker.setTag(key);
+
+                            markers.add(mDriverMarker);
+                        }
+                        if(dataSnapshot.child("service").getValue(String.class).equals("help")) {
+                            mMap.clear();
+                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.diet)));
+                            mDriverMarker.setTag(key);
+
+                            markers.add(mDriverMarker);
+                    }
+                        if(dataSnapshot.child("service").getValue(String.class).equals("oxygen")) {
+                            mMap.clear();
+                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.oxygen)));
+                            mDriverMarker.setTag(key);
+
+                            markers.add(mDriverMarker);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                };
+                uidRef.addListenerForSingleValueEvent(valueEventListener);
 
                 for(Marker markerIt : markers){
                     if(markerIt.getTag().equals(key))
                         return;
                 }
 
-                LatLng personLocation = new LatLng(location.latitude, location.longitude);
 
-                Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero)));
-                mDriverMarker.setTag(key);
 
-                markers.add(mDriverMarker);
 
 
             }
+
 
             @Override
             public void onKeyExited(String key) {
                 for(Marker markerIt : markers){
                     if(markerIt.getTag().equals(key)){
                         markerIt.remove();
+                        markers.remove(markerIt);
+                        return;
                     }
                 }
             }

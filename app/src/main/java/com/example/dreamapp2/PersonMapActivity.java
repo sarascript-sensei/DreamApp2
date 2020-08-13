@@ -47,8 +47,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -472,8 +470,6 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                     //mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-                    if (!getDriversAroundStarted)
-                        getDriversAround();
                 }
             }
         }
