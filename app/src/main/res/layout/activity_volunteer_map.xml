@@ -54,7 +54,7 @@ tools:context=".VolunteerMapActivity" >
     android:layout_gravity="bottom"
     android:orientation="vertical"
     android:background="@android:color/white"
-    android:visibility="visible"
+    android:visibility="gone"
     android:elevation="1dp"
     android:translationZ="1dp">
     <LinearLayout
@@ -88,6 +88,12 @@ tools:context=".VolunteerMapActivity" >
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/customerPhone"
+                android:paddingBottom="10sp"
+                android:paddingTop="20sp"/>
+            <Marker
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/customerMarker"
                 android:paddingBottom="10sp"
                 android:paddingTop="20sp"/>
         </LinearLayout>

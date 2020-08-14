@@ -26,8 +26,6 @@ import androidx.fragment.app.FragmentActivity;
 import com.bumptech.glide.Glide;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQuery;
-import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -48,7 +46,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,8 +65,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     private int status = 0;
 
     private String customerId = "";
-    private LatLng destinationLatLng, pickupLatLng;
-    private float rideDistance;
+    private LatLng pickupLatLng;
 
     private Boolean isLoggingOut = false;
 
@@ -78,7 +74,6 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     private LinearLayout mCustomerInfo;
 
     private ImageView mCustomerProfileImage;
-
     private TextView mCustomerName, mCustomerPhone, mCustomerProblem;
 
     @Override
@@ -133,16 +128,10 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                 return;
             }
         });
-        mRideStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
         mSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(VolunteerMapActivity.this,OwnInfoVolunteer.class);
+                Intent intent = new Intent(VolunteerMapActivity.this, OwnInfoVolunteer.class);
                 startActivity(intent);
                 return;
             }
@@ -150,6 +139,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         getAssignedCustomer();
     }
 
+    //Выбранный пользователь
     private void getAssignedCustomer() {
         String driverId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final DatabaseReference assignedCustomerRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverId).child("customerRequest").child("customerRideId");
@@ -161,18 +151,18 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                     getAssignedCustomerPickupLocation();
                     getAssignedCustomerInfo();
                 } else {
-                   customerId = " ";
-                   if(pickupMarker!=null) {
-                       pickupMarker.remove();
-                   }
-                   if (assignedCustomerPickupLocationRefListener!=null) {
-                       assignedCustomerRef.removeEventListener(assignedCustomerPickupLocationRefListener);
-                   }
-                   mCustomerInfo.setVisibility(View.GONE);
-                   mCustomerName.setText(" ");
-                   mCustomerPhone.setText(" ");
-                   mCustomerProblem.setText(" ");
-                   mCustomerProfileImage.setImageResource(R.mipmap.ic_default_user);
+                    customerId = " ";
+                    if (pickupMarker != null) {
+                        pickupMarker.remove();
+                    }
+                    if (assignedCustomerPickupLocationRefListener != null) {
+                        assignedCustomerRef.removeEventListener(assignedCustomerPickupLocationRefListener);
+                    }
+                    mCustomerInfo.setVisibility(View.GONE);
+                    mCustomerName.setText(" ");
+                    mCustomerPhone.setText(" ");
+                    mCustomerProblem.setText(" ");
+                    mCustomerProfileImage.setImageResource(R.mipmap.ic_default_user);
                 }
             }
 
@@ -213,7 +203,6 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     }
 
 
-
     private void getAssignedCustomerInfo() {
         mCustomerInfo.setVisibility(View.VISIBLE);
         DatabaseReference mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(customerId);
@@ -231,7 +220,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                     if (map.get("profileImageUrl") != null) {
                         Glide.with(getApplication()).load(map.get("profileImageUrl").toString()).into(mCustomerProfileImage);
                     }
-                    if(map.get("problem")!= null) {
+                    if (map.get("problem") != null) {
                         mCustomerProblem.setText(map.get("problem").toString());
                     }
                 }
@@ -243,39 +232,6 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         });
     }
 
-
-    private void endRide() {
-        mRideStatus.setText("picked customer");
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference driverRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(userId).child("customerRequest");
-        driverRef.removeValue();
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.removeLocation(customerId);
-        customerId = "";
-        rideDistance = 0;
-
-        if (pickupMarker != null) {
-            pickupMarker.remove();
-        }
-        if (assignedCustomerPickupLocationRefListener != null) {
-            assignedCustomerPickupLocationRef.removeEventListener(assignedCustomerPickupLocationRefListener);
-        }
-        mCustomerInfo.setVisibility(View.GONE);
-        mCustomerName.setText("");
-        mCustomerPhone.setText("");
-        mCustomerProblem.setText("Проблема");
-        mCustomerProfileImage.setImageResource(R.mipmap.ic_default_user);
-    }
-
-
-    private Long getCurrentTimestamp() {
-        Long timestamp = System.currentTimeMillis() / 1000;
-        return timestamp;
-    }
-
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -284,7 +240,53 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference usersRef = rootRef
+                .child("Users").child("Customers");
 
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                    //Toast.makeText(L_Location_Activity.this,"for",Toast.LENGTH_LONG).show();
+
+                    String latitude_Display = ds
+                            .child("latitude")
+                            .getValue().toString();
+
+                    String longitude_Display = ds
+                            .child("longitude")
+                            .getValue().toString();
+
+
+                    String latLng = latitude_Display;
+                    String latLng1 = longitude_Display;
+
+
+                    double latitude = Double.parseDouble(latLng);
+                    double longitude = Double.parseDouble(latLng1);
+
+                    // map.clear();
+                    LatLng currentLocation = new LatLng(latitude, longitude);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(currentLocation);
+                    //markerOptions.title("i'm here");
+                    //map.addMarker( markerOptions );
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(latitude, longitude))
+                            .title("Hello world"))
+                            .setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+
+        usersRef.addListenerForSingleValueEvent(eventListener);
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
@@ -301,35 +303,32 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
             for (Location location : locationResult.getLocations()) {
                 if (getApplicationContext() != null) {
                     mLastLocation = location;
-                    }
+                }
 
 
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
-                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                DatabaseReference refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable");
+                DatabaseReference refWorking = FirebaseDatabase.getInstance().getReference("driversWorking");
+                GeoFire geoFireAvailable = new GeoFire(refAvailable);
+                GeoFire geoFireWorking = new GeoFire(refWorking);
 
-                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    DatabaseReference refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable");
-                    DatabaseReference refWorking = FirebaseDatabase.getInstance().getReference("driversWorking");
-                    GeoFire geoFireAvailable = new GeoFire(refAvailable);
-                    GeoFire geoFireWorking = new GeoFire(refWorking);
+                switch (customerId) {
+                    case "":
+                        geoFireWorking.removeLocation(userId);
+                        geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
+                        break;
 
-                    switch (customerId) {
-                        case "":
-                            geoFireWorking.removeLocation(userId);
-                            geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-                            break;
-
-                        default:
-                            geoFireAvailable.removeLocation(userId);
-                            geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-                            break;
-                    }
-                    if (!getDriversAroundStarted)
-                        getDriversAround();
+                    default:
+                        geoFireAvailable.removeLocation(userId);
+                        geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
+                        break;
                 }
             }
+        }
     };
 
     private void checkLocationPermission() {
@@ -386,112 +385,5 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
 
         GeoFire geoFire = new GeoFire(ref);
         geoFire.removeLocation(userId);
-    }
-
-    boolean getDriversAroundStarted = false;
-    List<Marker> markers = new ArrayList<Marker>();
-    private void getDriversAround(){
-        getDriversAroundStarted = true;
-        final DatabaseReference personLocation = FirebaseDatabase.getInstance().getReference().child("customerRequest");
-
-        GeoFire geoFire = new GeoFire(personLocation);
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(mLastLocation.getLongitude(), mLastLocation.getLatitude()), 999999999);
-
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(final String key, GeoLocation location) {
-                final LatLng personLocation = new LatLng(location.latitude, location.longitude);
-
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-                DatabaseReference uidRef = rootRef.child(uid);
-
-                ValueEventListener valueEventListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.child("service").getValue(String.class).equals("carneeded")) {
-                            mMap.clear();
-                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero)));
-                            mDriverMarker.setTag(key);
-
-                            markers.add(mDriverMarker);
-                        }
-                        if (dataSnapshot.child("service").getValue(String.class).equals("carneeded")) {
-                            mMap.clear();
-                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.superhero)));
-                            mDriverMarker.setTag(key);
-
-                            markers.add(mDriverMarker);
-                        }
-                        if (dataSnapshot.child("service").getValue(String.class).equals("medicine")) {
-                            mMap.clear();
-                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine)));
-                            mDriverMarker.setTag(key);
-
-                            markers.add(mDriverMarker);
-                        }
-                        if(dataSnapshot.child("service").getValue(String.class).equals("help")) {
-                            mMap.clear();
-                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.diet)));
-                            mDriverMarker.setTag(key);
-
-                            markers.add(mDriverMarker);
-                    }
-                        if(dataSnapshot.child("service").getValue(String.class).equals("oxygen")) {
-                            mMap.clear();
-                            Marker mDriverMarker = mMap.addMarker(new MarkerOptions().position(personLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.oxygen)));
-                            mDriverMarker.setTag(key);
-
-                            markers.add(mDriverMarker);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                };
-                uidRef.addListenerForSingleValueEvent(valueEventListener);
-
-                for(Marker markerIt : markers){
-                    if(markerIt.getTag().equals(key))
-                        return;
-                }
-
-
-
-
-
-            }
-
-
-            @Override
-            public void onKeyExited(String key) {
-                for(Marker markerIt : markers){
-                    if(markerIt.getTag().equals(key)){
-                        markerIt.remove();
-                        markers.remove(markerIt);
-                        return;
-                    }
-                }
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-                for(Marker markerIt : markers){
-                    if(markerIt.getTag().equals(key)){
-                        markerIt.setPosition(new LatLng(location.latitude, location.longitude));
-                    }
-                }
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-
-            }
-        });
     }
 }
