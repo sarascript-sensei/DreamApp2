@@ -1,6 +1,7 @@
 package com.example.dreamapp2;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -130,103 +131,61 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
         mRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//Отмена запроса
-                if (requestBol) {
-                    requestBol = false;
-                    geoQuery.removeAllListeners();
-                    driverLocationRef.removeEventListener(driverLocationRefListener);
-                    if (driverFoundID != null) {
-                        DatabaseReference driverRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID).child("customerRequest");
-                        driverRef.removeValue();
-                        driverFoundID = null;
-
-                    }
-                    driverFound = false;
-                    radius = 1;
                     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
-                    GeoFire geoFire = new GeoFire(ref);
-                    geoFire.removeLocation(userId);
-
-                    if (pickupMarker != null) {
-                        pickupMarker.remove();
-                    }
-                    if (mDriverMarker != null) {
-                        mDriverMarker.remove();
-                    }
-                    mRequest.setText("Мне нужна помощь");
-
-                    mDriverInfo.setVisibility(View.GONE);
-                    mDriverName.setText("");
-                    mDriverPhone.setText("");
-                    mDriverCommunity.setText("Сообщество:");
-                    mDriverProfileImage.setImageResource(R.mipmap.ic_default_user);
-
-
-                } else {
-                    int selectId = mRadioGroup.getCheckedRadioButtonId();
-
-                    final RadioButton radioButton = (RadioButton) findViewById(selectId);
-
-                    if (radioButton.getText() == null) {
-                        return;
-                    }
-
-                    requestService = radioButton.getText().toString();
-
-                    requestBol = true;
-
-                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
-                    GeoFire geoFire = new GeoFire(ref);
+                    GeoFire geoFire = new GeoFire(CustomerDatabase);
                     geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+
+
                     pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    DatabaseReference mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(customerId);
-                    mCustomerDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
-                                Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-                                if(map.get("service")!=null){
-                                    mService = map.get("service").toString();
-                                    switch (mService){
-                                        case"carneeded":
-                                            mRadioGroup.check(R.id.carneeded);
-                                            pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.car)));
-                                            break;
-                                        case"medicine":
-                                            mRadioGroup.check(R.id.medicine);
-                                            pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine)));
-                                            break;
-                                        case"help":
-                                            mRadioGroup.check(R.id.help);
-                                            pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.diet)));
-                                            break;
-                                        case"oxygen":
-                                            mRadioGroup.check(R.id.oxygen);
-                                            pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.oxygen)));
-                                            break;
-                                    }
-                                }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(PersonMapActivity.this);
+                    builder.setTitle("Я нуждаюсь в ");
 
-                                pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
-                                }
+// add a list
+                    String[] animals = {"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
+                    final MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(pickupLocation);
+                    builder.setItems(animals, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case 0:
+                                    mMap.clear();
+                                    markerOptions.title("Лекарства").icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine));
+                                    mMap.addMarker(markerOptions);
+                                    break;
+                                case 1:
+                                    mMap.clear();
+                                    markerOptions.title("Продукты").icon(BitmapDescriptorFactory.fromResource(R.mipmap.diet));
+                                    mMap.addMarker(markerOptions);
+                                    break;
+                                case 2:
+                                    mMap.clear();
+                                    markerOptions.title("СИЗ").icon(BitmapDescriptorFactory.fromResource(R.mipmap.oxygen));
+                                    mMap.addMarker(markerOptions);
+                                    break;
+                                case 3:
+                                    mMap.clear();
+                                    markerOptions.title("Попутка").icon(BitmapDescriptorFactory.fromResource(R.mipmap.car));
+                                    mMap.addMarker(markerOptions);
+                                    break;
+                                case 4:
+                                    mMap.clear();
+                                    markerOptions.title("Помощь(SOS)").icon(BitmapDescriptorFactory.fromResource(R.drawable.help));
+                                    mMap.addMarker(markerOptions);
+                                    break;
                             }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
                         }
                     });
 
-
-
+// create and show the alert dialog
                     mRequest.setText("В поисках волонтёра...");
-
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
-            }
-        });
+            });
+
+
         mSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -263,36 +222,6 @@ public class PersonMapActivity extends FragmentActivity implements OnMapReadyCal
     |  Note: --
     |
     *-------------------------------------------------------------------*/
-    //Информация о волонтёре
-    private void getDriverInfo() {
-        mDriverInfo.setVisibility(View.VISIBLE);
-        DatabaseReference mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID);
-        mCustomerDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
-                    if (dataSnapshot.child("name") != null) {
-                        mDriverName.setText(dataSnapshot.child("name").getValue().toString());
-                    }
-                    if (dataSnapshot.child("phone") != null) {
-                        mDriverPhone.setText(dataSnapshot.child("phone").getValue().toString());
-                    }
-                    if (dataSnapshot.child("community") != null) {
-                        mDriverCommunity.setText(dataSnapshot.child("community").getValue().toString());
-                    }
-                    if (dataSnapshot.child("profileImageUrl").getValue() != null) {
-                        Glide.with(getApplication()).load(dataSnapshot.child("profileImageUrl").getValue().toString()).into(mDriverProfileImage);
-                    }
-                    //Рейтинг волонтёра
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
     /*-------------------------------------------- Map specific functions -----
     |  Function(s) onMapReady, buildGoogleApiClient, onLocationChanged, onConnected
     |
