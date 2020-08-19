@@ -72,28 +72,36 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
     // Map related variables
     private GoogleMap mMap;
-    Location mLastLocation;
-    LocationRequest mLocationRequest;
+    private Location mLastLocation; // Location
+    private LocationRequest mLocationRequest; // Location request
 
-    private FusedLocationProviderClient mFusedLocationClient;
+    private FusedLocationProviderClient mFusedLocationClient; // Fused location provider client
 
+    // LatLng object
+    private LatLng destinationLatLng;
+    private LatLng pickupLocation;
+
+    // Button
     private Button mLogout, mRequest, mSettings, mHistory;
 
-    private LatLng pickupLocation;
-    private String customerId = "";
-
+    // Logging out boolean variable
+    private Boolean isLoggingOut = false;
     private Boolean requestBol = false;
 
+    // What Marker is that?
     private Marker pickupMarker;
 
+    // Map fragment
     private SupportMapFragment mapFragment;
     private DatabaseReference customerDatabase;
 
+    // String
     private String requestService;
+    private String mService;
+    private String mUserType = null;
+    private String customerId = "";
 
-    private LatLng destinationLatLng;
-
-  //  private ImageView mProfileImage;
+    // Profile image
     private CircleImageView mProfileImage;
 
     // TextView
@@ -103,16 +111,16 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     private TextView userName;
     private TextView userType;
 
+    // Rating bar
     private RadioGroup mRadioGroup;
-    private String mService;
     private RatingBar mRatingBar;
 
+    // DrawerLayout and Navigation view
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
     // Shared preferences
     private SharedPreferences shared = null;
-    private String mUserType = null;
 
     // Firebase
     private FirebaseAuth mAuth;
@@ -120,17 +128,13 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     private DatabaseReference mHelpRequestDatabase;
     private String userID;
 
-    // Logging out boolean variable
-    private Boolean isLoggingOut = false;
-
     // Marker options to show on the Google Map
     private MarkerOptions markerOptions;
-    // Help list
-    private String[] list;
-    private ArrayList<String> helpList = new ArrayList<>(Arrays.asList("Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"));
-
-
+    // Array lists
+    private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
+    private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.diet, R.mipmap.oxygen, R.mipmap.car, R.mipmap.superhero };
     //------------------------------DRAWER-LAYOUT-NAVIGATION-LISTENER------------------------------------------------------
+
     // On navigation item selected listener in the drawer layout
     private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
             new OnSingleClickNavigationViewListener() {
@@ -187,7 +191,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
                 .child(shared.getString(MyPreferenceManager.USER_TYPE, null))
                 .child(userID);
-
+        // Help requests database
         mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
                 .child("HelpRequests");
 
@@ -196,9 +200,6 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
         // Load user's help request location
         loadHelpLocation();
-
-        // List of type of help that the user needs
-        list = helpList.toArray(new String[0]);
 
         // On help request listener
         mRequest.setOnClickListener(new OnSingleClickListener() {
@@ -231,19 +232,19 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
             mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.userImage);
             // Sets text that shows who the user is: regular or volunteer
             if (mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
-                userType.setText("Пользователь");
+                userType.setText("Пользователь"); // Regular user
             } else {
-                userType.setText("Волонтёр");
+                userType.setText("Волонтёр"); // Volunteer
             }
         } catch(NullPointerException error) {
             Log.d("CustomerMainActivity", "initView: "+error.getLocalizedMessage());
         }
     }
     //--------------------------------------------------------------------------------------------------------------------------
-    private void setMarkerOption(String problemTitle) {
-        mMap.clear();
-        markerOptions.title(problemTitle).icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine));
-        mMap.addMarker(markerOptions);
+    private void setMarkerOption(String problemTitle, int id) {
+        mMap.clear(); // Clears from marker options
+        markerOptions.title(problemTitle).icon(BitmapDescriptorFactory.fromResource(icons[id])); // Sets title and marker icon
+        mMap.addMarker(markerOptions); // Adds the created marker option to the map
     }
     //--------------------------------------------------------------------------------------------------------------------------
     // On help request button click
@@ -263,7 +264,8 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         builder.setItems(list, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                setMarkerOption(list[id]); // Sets marker option
+                setMarkerOption(list[id], id); // Sets marker option
+                mHelpRequestDatabase.child(userID).child("iconId").setValue(id); // Id of option marker
                 mHelpRequestDatabase.child(userID).child("problem").setValue(list[id]); // Updates problem in Firebase database
             }
         });
@@ -288,13 +290,8 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                         if (map.get("name") != null) {
                             userName.setText(map.get("name").toString());
                         }
-                        // User's problem
-//                        if (map.get("problem") != null) {
-//                            helpList.add(map.get("probem").toString());
-//                        }
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
-                           // mProfileImageUrl = map.get("profileImageUrl").toString();
                             Glide.with(getApplication()).load(Uri.parse(map.get("profileImageUrl").toString())).into(mProfileImage);
                         }
                     }
@@ -309,7 +306,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
             }
         });
     }
-
+    //------------------------------------------------------------------------------------------------------------------------------
     // Loads user's help location (lat, long)
     private void loadHelpLocation() {
         mHelpRequestDatabase.child(userID).addValueEventListener(new ValueEventListener() {
@@ -324,8 +321,10 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                         pickupLocation = new LatLng(list.get(0), list.get(1));
                         MarkerOptions markerOptions = new MarkerOptions(); // Marker options
                         markerOptions.position(pickupLocation); // Sets the location
+                        int id = Integer.parseInt(map.get("iconId").toString());
                         mMap.clear();
-                        markerOptions.title(map.get("problem").toString()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine));
+                        markerOptions.title(map.get("problem").toString())
+                             .icon(BitmapDescriptorFactory.fromResource(icons[id]));
                         mMap.addMarker(markerOptions);
                     }
                 } catch(NullPointerException error) {
@@ -342,7 +341,6 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     //--------------------------------------------------------------------------------------------------------------------------------------
     private void logout() {
         isLoggingOut = true;
-
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this, WelcomeActivity.class));
         finish();
@@ -393,6 +391,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        // Version checking and granting permission to use location
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
