@@ -8,12 +8,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:365089261866:android:1d10994c77a3f16022b653",
+        "mobilesdk_app_id": "1:365089261866:android:63290ada4a63888a22b653",
         "android_client_info": {
-          "package_name": "com.example.dreamapp2"
+          "package_name": "com.unicef.dreamapp2"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "365089261866-eh7lt0k59osekasl00sqq9iug3nmubhl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.unicef.dreamapp2",
+            "certificate_hash": "d39b4aab13c2e6fae83683282f52c8d10a14bb9e"
+          }
+        },
         {
           "client_id": "365089261866-0io0s278cggqq9v9ah161gqu65o4i4kj.apps.googleusercontent.com",
           "client_type": 3

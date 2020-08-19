@@ -1,14 +1,18 @@
-package com.example.dreamapp2;
+package com.unicef.dreamapp2.ui.main.main;
 
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -21,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import com.bumptech.glide.Glide;
@@ -39,18 +44,23 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
+import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
 import java.util.List;
 import java.util.Map;
 
 
-public class VolunteerMapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class VolunteerMainActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     Location mLastLocation;
     LocationRequest mLocationRequest;
@@ -74,30 +84,89 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
     private LinearLayout mCustomerInfo;
 
     private ImageView mCustomerProfileImage;
-    private TextView mCustomerName, mCustomerPhone, mCustomerProblem;
+    private TextView mCustomerName;
+    private TextView mCustomerPhone;
+    private TextView mCustomerProblem;
+    private TextView userName;
+
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+
+    // Shared preferences
+    private SharedPreferences shared = null;
+    private String mUserType = null;
+
+    // Firebase
+    private FirebaseAuth mAuth;
+    private DatabaseReference mCustomerDatabase;
+    private String userID;
+
+    // On navigation item selected listener in the drawer layout
+    private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
+            new OnSingleClickNavigationViewListener() {
+                @Override
+                public boolean onSingleClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.history:
+                            drawerLayout.closeDrawers();
+                            Toast.makeText(VolunteerMainActivity.this, "History!", Toast.LENGTH_SHORT).show();
+                            break;
+                        case R.id.chat:
+                            Toast.makeText(VolunteerMainActivity.this, "Chat!", Toast.LENGTH_SHORT).show();
+                            drawerLayout.closeDrawers();
+                            break;
+                        case R.id.change_profile:
+                            Toast.makeText(VolunteerMainActivity.this, "Change profile!", Toast.LENGTH_SHORT).show();
+                            drawerLayout.closeDrawers();
+                            break;
+                        case R.id.logout:
+                            drawerLayout.closeDrawers();
+                            logout();
+                            break;
+                    }
+                    return true;
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_volunteer_map);
+        setContentView(R.layout.activity_volunteer_main);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
+        // Initializes views
+        initView();
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        // Initialized shared preferences
+        shared = MyPreferenceManager.getMySharedPreferences(this);
+        mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
+
+        // Firebase realtime database
+        mAuth = FirebaseAuth.getInstance();
+        // User ID
+        userID = mAuth.getCurrentUser().getUid();
+        // Firebase database
+        mCustomerDatabase = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("Users")
+                .child(shared.getString(MyPreferenceManager.USER_TYPE, null))
+                .child(userID);
+
+        loadUserInfo();
+    /*    mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
 
-        mCustomerInfo = (LinearLayout) findViewById(R.id.customerInfo);
+        mCustomerInfo = findViewById(R.id.customerInfo);
 
-        mCustomerProfileImage = (ImageView) findViewById(R.id.customerProfileImage);
+        mCustomerProfileImage = findViewById(R.id.customerProfileImage);
 
-        mCustomerName = (TextView) findViewById(R.id.customerName);
-        mCustomerPhone = (TextView) findViewById(R.id.customerPhone);
-        mCustomerProblem = (TextView) findViewById(R.id.customerProblem);
+        mCustomerName = findViewById(R.id.customerName);
+        mCustomerProblem = findViewById(R.id.customerProblem);
 
-        mWorkingSwitch = (Switch) findViewById(R.id.workingSwitch);
+        mWorkingSwitch =  findViewById(R.id.workingSwitch);
         mWorkingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -122,7 +191,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                 disconnectDriver();
 
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(VolunteerMapActivity.this, WelcomeActivity.class);
+                Intent intent = new Intent(VolunteerMainActivity.this, WelcomeActivity.class);
                 startActivity(intent);
                 finish();
                 return;
@@ -131,18 +200,91 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         mSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(VolunteerMapActivity.this, OwnInfoVolunteer.class);
+                Intent intent = new Intent(VolunteerMainActivity.this, VolunteerMainActivity.class);
                 startActivity(intent);
                 return;
             }
-        });
-        getAssignedCustomer();
+        });*/
+        // getAssignedCustomer();
     }
 
-    //Выбранный пользователь
+    private void initView() {
+        // DrawerLayout
+        drawerLayout = findViewById(R.id.drawer);
+        // Navigation view
+        navigationView = findViewById(R.id.navigationView);
+        navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
+        // TextView
+        userName = navigationView.getHeaderView(0).findViewById(R.id.userName);
+    }
+
+    // Log out
+    private void logout() {
+        isLoggingOut = true;
+
+        disconnectDriver();
+
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(VolunteerMainActivity.this, WelcomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    // Loads user profile information from Firebase database
+    // 1 - User name
+    // 2 - User phone number
+    // 3 - User problem ( or a regular user, not volunteer)
+    private void loadUserInfo(){
+        mCustomerDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
+                        // Map data structure
+                        Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                        // User name
+                        if (map.get("name") != null) {
+                             userName.setText(map.get("name").toString());
+                        }
+                        // User phone
+                       /* if (map.get("phone") != null) {
+                            mPhone = map.get("phone").toString();
+                            mPhoneField.setText(mPhone);
+                        }
+                        // User problem
+                        if (map.get("problem") != null) {
+                            mProblem = map.get("problem").toString();
+                            mProblemField.setText(mProblem);
+                        }*/
+                        // User profile image URI
+                        if (map.get("profileImageUrl") != null) {
+                           // mProfileImageUrl = map.get("profileImageUrl").toString();
+                           // Glide.with(getApplication()).load(Uri.parse(mProfileImageUrl)).into(mProfileImage);
+                        }
+                    }
+                } catch(NullPointerException error) {
+                    Log.d("AccountSetupActivity", "onDataChange: error: "+error.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Cancelled
+            }
+        });
+    }
+
+    // Get the assigned customer
     private void getAssignedCustomer() {
         String driverId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final DatabaseReference assignedCustomerRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverId).child("customerRequest").child("customerRideId");
+        final DatabaseReference assignedCustomerRef = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("Users")
+                .child("Drivers")
+                .child(driverId)
+                .child("customerRequest")
+                .child("customerRideId");
+
         assignedCustomerRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -172,6 +314,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         });
     }
 
+    //
     Marker pickupMarker;
     private DatabaseReference assignedCustomerPickupLocationRef;
     private ValueEventListener assignedCustomerPickupLocationRefListener;
@@ -192,7 +335,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                         locationLng = Double.parseDouble(map.get(1).toString());
                     }
                     pickupLatLng = new LatLng(locationLat, locationLng);
-                    pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLatLng).title("pickup location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
+                    pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLatLng).title("Help location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
                 }
             }
 
@@ -202,7 +345,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         });
     }
 
-
+    // Gets assigned customer info
     private void getAssignedCustomerInfo() {
         mCustomerInfo.setVisibility(View.VISIBLE);
         DatabaseReference mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(customerId);
@@ -232,6 +375,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         });
     }
 
+    // Map ready
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -296,7 +440,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         }
     }
 
-
+    // Location call backs interface listener
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
@@ -331,6 +475,7 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         }
     };
 
+    // Check geo location permission
     private void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -340,13 +485,13 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(VolunteerMapActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                                ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                             }
                         })
                         .create()
                         .show();
             } else {
-                ActivityCompat.requestPermissions(VolunteerMapActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
     }
@@ -369,13 +514,14 @@ public class VolunteerMapActivity extends FragmentActivity implements OnMapReady
         }
     }
 
-
+    // Connects driver
     private void connectDriver() {
         checkLocationPermission();
         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
         mMap.setMyLocationEnabled(true);
     }
 
+    // Disconnects driver
     private void disconnectDriver() {
         if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);

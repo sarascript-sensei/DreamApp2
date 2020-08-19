@@ -1,0 +1,473 @@
+package com.unicef.dreamapp2.ui.main.main;
+
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Looper;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.RatingBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentActivity;
+
+import com.bumptech.glide.Glide;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.mikhaellopez.circularimageview.CircularImageView;
+import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
+import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
+import com.unicef.dreamapp2.ui.login.AccountSetupActivity;
+import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
+
+public class CustomerMainActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    // Map related variables
+    private GoogleMap mMap;
+    Location mLastLocation;
+    LocationRequest mLocationRequest;
+
+    private FusedLocationProviderClient mFusedLocationClient;
+
+    private Button mLogout, mRequest, mSettings, mHistory;
+
+    private LatLng pickupLocation;
+    private String customerId = "";
+
+    private Boolean requestBol = false;
+
+    private Marker pickupMarker;
+
+    private SupportMapFragment mapFragment;
+    private DatabaseReference customerDatabase;
+
+    private String requestService;
+
+    private LatLng destinationLatLng;
+
+  //  private ImageView mProfileImage;
+    private CircleImageView mProfileImage;
+
+    // TextView
+    private TextView mDriverName;
+    private TextView mDriverPhone;
+    private TextView mDriverCommunity;
+    private TextView userName;
+    private TextView userType;
+
+    private RadioGroup mRadioGroup;
+    private String mService;
+    private RatingBar mRatingBar;
+
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+
+    // Shared preferences
+    private SharedPreferences shared = null;
+    private String mUserType = null;
+
+    // Firebase
+    private FirebaseAuth mAuth;
+    private DatabaseReference mCustomerDatabase;
+    private DatabaseReference mHelpRequestDatabase;
+    private String userID;
+
+    // Logging out boolean variable
+    private Boolean isLoggingOut = false;
+
+    // Marker options to show on the Google Map
+    private MarkerOptions markerOptions;
+    // Help list
+    private String[] list;
+    private ArrayList<String> helpList = new ArrayList<>(Arrays.asList("Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"));
+
+
+    //------------------------------DRAWER-LAYOUT-NAVIGATION-LISTENER------------------------------------------------------
+    // On navigation item selected listener in the drawer layout
+    private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
+            new OnSingleClickNavigationViewListener() {
+                @Override
+                public boolean onSingleClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        // History
+                        case R.id.history:
+                            drawerLayout.closeDrawers();
+                            Toast.makeText(CustomerMainActivity.this, "History!", Toast.LENGTH_SHORT).show();
+                            break;
+                            // Chat
+                        case R.id.chat:
+                            Toast.makeText(CustomerMainActivity.this, "Chat!", Toast.LENGTH_SHORT).show();
+                            drawerLayout.closeDrawers();
+                            break;
+                            // Change profile
+                        case R.id.change_profile:
+                            startActivity(new Intent(CustomerMainActivity.this, AccountSetupActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
+                            // Logout
+                        case R.id.logout:
+                            drawerLayout.closeDrawers();
+                            logout();
+                            break;
+                    }
+                    return true;
+                }
+            };
+    //--------------------------------------------------------------------------------------------------------------------------
+    //--------------------------------------ON-CREATE-ACTIVITY------------------------------------------------------------------
+    // On creation of activity
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_customer_main);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Initializes views
+        initView();
+
+        // Initialized shared preferences
+        shared = MyPreferenceManager.getMySharedPreferences(this);
+        mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
+
+        // Firebase realtime database
+        mAuth = FirebaseAuth.getInstance();
+        // User ID
+        userID = mAuth.getCurrentUser().getUid();
+        // Firebase databases
+        mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
+                .child(shared.getString(MyPreferenceManager.USER_TYPE, null))
+                .child(userID);
+
+        mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
+                .child("HelpRequests");
+
+        // Loads user info
+        loadUserInfo();
+
+        // Load user's help request location
+        loadHelpLocation();
+
+        // List of type of help that the user needs
+        list = helpList.toArray(new String[0]);
+
+        // On help request listener
+        mRequest.setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View view) {
+                requestHelp();
+            }
+        });
+    }
+    //--------------------------------------------------------------------------------------------------------------------------
+    // Initializes views
+    private void initView() {
+        try {
+            // Map fragment
+            mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            // Sets onMapReadCallback that the activity implements
+            mapFragment.getMapAsync(this);
+            // Request help button
+            mRequest = findViewById(R.id.request);
+            // DrawerLayout
+            drawerLayout = findViewById(R.id.drawer);
+            // Navigation view
+            navigationView = findViewById(R.id.navigationView);
+            navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
+            // TextView
+            userName = navigationView.getHeaderView(0).findViewById(R.id.userName);
+            // User type (Regular or volunteer)
+            userType = navigationView.getHeaderView(0).findViewById(R.id.userType);
+            // User image
+            mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.userImage);
+            // Sets text that shows who the user is: regular or volunteer
+            if (mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
+                userType.setText("Пользователь");
+            } else {
+                userType.setText("Волонтёр");
+            }
+        } catch(NullPointerException error) {
+            Log.d("CustomerMainActivity", "initView: "+error.getLocalizedMessage());
+        }
+    }
+    //--------------------------------------------------------------------------------------------------------------------------
+    private void setMarkerOption(String problemTitle) {
+        mMap.clear();
+        markerOptions.title(problemTitle).icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine));
+        mMap.addMarker(markerOptions);
+    }
+    //--------------------------------------------------------------------------------------------------------------------------
+    // On help request button click
+    private void requestHelp() {
+        // Location latitude and longitude
+        GeoFire geoFire = new GeoFire(mHelpRequestDatabase);
+        geoFire.setLocation(userID, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+        // LatLng object creation
+        pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        // Creating a list
+        markerOptions = new MarkerOptions(); // Marker options
+        markerOptions.position(pickupLocation); // Sets the location
+        // Alert dialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(CustomerMainActivity.this);
+        builder.setTitle("Я нуждаюсь в ");
+        // Sets list items in the AlerDialog
+        builder.setItems(list, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                setMarkerOption(list[id]); // Sets marker option
+                mHelpRequestDatabase.child(userID).child("problem").setValue(list[id]); // Updates problem in Firebase database
+            }
+        });
+        builder.create().show();  // Create and show the alert dialog
+        // Informs the user that the search for volunteers has begun
+        mRequest.setText("В поисках волонтёра...");
+    }
+
+    // Loads user profile information from Firebase database
+    // 1 - User name
+    // 2 - User phone number
+    // 3 - User problem ( or a regular user, not volunteer)
+    private void loadUserInfo(){
+        mCustomerDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
+                        // Map data structure
+                        Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                        // User name
+                        if (map.get("name") != null) {
+                            userName.setText(map.get("name").toString());
+                        }
+                        // User's problem
+//                        if (map.get("problem") != null) {
+//                            helpList.add(map.get("probem").toString());
+//                        }
+                        // User profile image URI
+                        if (map.get("profileImageUrl") != null) {
+                           // mProfileImageUrl = map.get("profileImageUrl").toString();
+                            Glide.with(getApplication()).load(Uri.parse(map.get("profileImageUrl").toString())).into(mProfileImage);
+                        }
+                    }
+                } catch(NullPointerException error) {
+                    Log.d("CustomerMainActivity", "onDataChange: error: "+error.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("CustomerMainActivity", "onCancelled: error: "+databaseError.getMessage());
+            }
+        });
+    }
+
+    // Loads user's help location (lat, long)
+    private void loadHelpLocation() {
+        mHelpRequestDatabase.child(userID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                try {
+                    if(snapshot.exists() && snapshot.getChildrenCount()>0) {
+                        // Map data structure
+                        Map<String, Object> map = (Map<String, Object>) snapshot.getValue();
+                        // Longitude and latitude
+                        ArrayList<Double> list = (ArrayList<Double> )map.get("l");
+                        pickupLocation = new LatLng(list.get(0), list.get(1));
+                        MarkerOptions markerOptions = new MarkerOptions(); // Marker options
+                        markerOptions.position(pickupLocation); // Sets the location
+                        mMap.clear();
+                        markerOptions.title(map.get("problem").toString()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.medicine));
+                        mMap.addMarker(markerOptions);
+                    }
+                } catch(NullPointerException error) {
+                    Log.d("CustomerMainActivity", "onDataChange (loadHelpLocation): error: "+error.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    private void logout() {
+        isLoggingOut = true;
+
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(this, WelcomeActivity.class));
+        finish();
+    }
+
+    //-------------------------------------------GOOGLE-MAP---------------------------------------------------------------------------------
+        /*-------------------------------------------- Map specific functions -----
+        |  Function(s) getDriverLocation
+        |
+        |  Purpose:  Get's most updated driver location and it's always checking for movements.
+        |
+        |  Note:
+        |	   Even tho we used geofire to push the location of the driver we can use a normal
+        |      Listener to get it's location with no problem.
+        |
+        |      0 -> Latitude
+        |      1 -> Longitudde
+        |
+        *-------------------------------------------------------------------*/
+
+
+    /*-------------------------------------------- getDriverInfo -----
+    |  Function(s) getDriverInfo
+    |
+    |  Purpose:  Get all the user information that we can get from the user's database.
+    |
+    |  Note: --
+    |
+    *-------------------------------------------------------------------*/
+    /*-------------------------------------------- Map specific functions -----
+    |  Function(s) onMapReady, buildGoogleApiClient, onLocationChanged, onConnected
+    |
+    |  Purpose:  Find and update user's location.
+    |
+    |  Note:
+    |	   The update interval is set to 1000Ms and the accuracy is set to PRIORITY_HIGH_ACCURACY,
+    |      If you're having trouble with battery draining too fast then change these to lower values
+    |
+    |
+    *-------------------------------------------------------------------*/
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // On map ready sets the global Map variable
+        mMap = googleMap;
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            } else {
+                checkLocationPermission();
+            }
+        }
+
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+        mMap.setMyLocationEnabled(true);
+    }
+
+    // Location callback
+    LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            for (Location location : locationResult.getLocations()) {
+                if (getApplicationContext() != null) {
+                    mLastLocation = location;
+
+                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                }
+            }
+        }
+    };
+    //-----------------------------------------------------------------------------------------------------------------------------------
+    /*-------------------------------------------- onRequestPermissionsResult -----
+    |  Function onRequestPermissionsResult
+    |
+    |  Purpose:  Get permissions for our app if they didn't previously exist.
+    |
+    |  Note:
+    |	requestCode: the nubmer assigned to the request that we've made. Each
+    |                request has it's own unique request code.
+    |
+    *-------------------------------------------------------------------*/
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new android.app.AlertDialog.Builder(this)
+                        .setTitle("give permission")
+                        .setMessage("give permission message")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ActivityCompat.requestPermissions(CustomerMainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                            }
+                        })
+                        .create()
+                        .show();
+            } else {
+                ActivityCompat.requestPermissions(CustomerMainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+                        mMap.setMyLocationEnabled(true);
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please provide the permission", Toast.LENGTH_LONG).show();
+                }
+                break;
+            }
+        }
+    }
+}
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------

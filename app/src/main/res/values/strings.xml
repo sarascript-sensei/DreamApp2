@@ -9,4 +9,8 @@
     <string name="TextView3">Еще нет аккаунта?</string>
     <string name="title_activity_volunteer_map">Map</string>
     <string name="title_activity_person_map">Map</string>
+    <string name="phone_number_hint_text">Номер телефона</string>
+    <string name="action_sign_in">Зарегестрироваться</string>
+    <string name="code_confirmation_hint_text">Код подтверждения</string>
+    <string name="confirm_button_text">Подтвердить</string>
 </resources>

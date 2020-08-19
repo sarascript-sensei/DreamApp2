@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/paymentheader_background"
+    android:layout_width="match_parent"
+    android:layout_height="140dp"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/takePicture"
+        android:background="@drawable/keypad_bg"
+        android:textColor="@color/colorPrimary"
+        android:textAllCaps="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16dp"
+        android:text="Добавить фото"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"/>
+    <Button
+        android:id="@+id/pickGallery"
+        android:background="@drawable/keypad_bg"
+        android:textColor="@color/colorPrimary"
+        android:textAllCaps="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16dp"
+        android:text="Загрузить из галереи"/>
+</LinearLayout>
