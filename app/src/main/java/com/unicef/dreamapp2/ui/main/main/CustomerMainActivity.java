@@ -228,14 +228,11 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
             userName = navigationView.getHeaderView(0).findViewById(R.id.userName);
             // User type (Regular or volunteer)
             userType = navigationView.getHeaderView(0).findViewById(R.id.userType);
+            // Sets text that shows who the user is: regular or volunteer
+            userType.setText("Пользователь"); // Regular user
             // User image
             mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.userImage);
-            // Sets text that shows who the user is: regular or volunteer
-            if (mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
-                userType.setText("Пользователь"); // Regular user
-            } else {
-                userType.setText("Волонтёр"); // Volunteer
-            }
+
         } catch(NullPointerException error) {
             Log.d("CustomerMainActivity", "initView: "+error.getLocalizedMessage());
         }
