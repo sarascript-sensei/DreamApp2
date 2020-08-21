@@ -1,14 +1,22 @@
 package com.unicef.dreamapp2.ui.welcome;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.unicef.dreamapp2.MainActivity;
 import com.unicef.dreamapp2.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.ui.login.PhoneActivity;
@@ -36,13 +44,12 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
+        // Initializes shared preferences
         shared = MyPreferenceManager.getMySharedPreferences(this);
         editor = shared.edit();
 
-        // Initializing views
-        // volunteerBtn = findViewById(R.id.volunteerBtn);
-        // userBtn = findViewById(R.id.personBtn);
-
+        // Checks location permission
+        checkLocationPermission();
     }
 
     // Starts regular person log in activity
@@ -55,5 +62,15 @@ public class WelcomeActivity extends AppCompatActivity {
     public void openVolunteerLogin(View view) {
         editor.putString(MyPreferenceManager.USER_TYPE, MyPreferenceManager.VOLUNTEER).commit();
         startActivity(new Intent(this, PhoneActivity.class));
+    }
+
+    private void checkLocationPermission() {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    ActivityCompat.requestPermissions(WelcomeActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                } else {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                }
+            }
     }
 }

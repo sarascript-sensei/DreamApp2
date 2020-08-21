@@ -268,7 +268,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         });
         builder.create().show();  // Create and show the alert dialog
         // Informs the user that the search for volunteers has begun
-        mRequest.setText("В поисках волонтёра...");
+        mRequest.setText("отмена");
     }
 
     // Loads user profile information from Firebase database
@@ -338,9 +338,9 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     //--------------------------------------------------------------------------------------------------------------------------------------
     private void logout() {
         isLoggingOut = true;
-        FirebaseAuth.getInstance().signOut();
-        startActivity(new Intent(this, WelcomeActivity.class));
-        finish();
+        FirebaseAuth.getInstance().signOut(); // Signs out from Firebase
+        startActivity(new Intent(this, WelcomeActivity.class)); // Returns to WelcomeActivity
+        finish(); // Finishes the current activity
     }
 
     //-------------------------------------------GOOGLE-MAP---------------------------------------------------------------------------------
@@ -390,9 +390,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
         // Version checking and granting permission to use location
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            } else {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 checkLocationPermission();
             }
         }
@@ -400,7 +398,16 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
         mMap.setMyLocationEnabled(true);
     }
-
+    // Check location permission
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                ActivityCompat.requestPermissions(CustomerMainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        }
+    }
     // Location callback
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -408,9 +415,9 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
             for (Location location : locationResult.getLocations()) {
                 if (getApplicationContext() != null) {
                     mLastLocation = location;
-
+                    // Creating LarLng
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
+                    // Points to the user location on the planet
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
                 }
@@ -428,26 +435,6 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     |                request has it's own unique request code.
     |
     *-------------------------------------------------------------------*/
-    private void checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                new android.app.AlertDialog.Builder(this)
-                        .setTitle("give permission")
-                        .setMessage("give permission message")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(CustomerMainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                            }
-                        })
-                        .create()
-                        .show();
-            } else {
-                ActivityCompat.requestPermissions(CustomerMainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            }
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

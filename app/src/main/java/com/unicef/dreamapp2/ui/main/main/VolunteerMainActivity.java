@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -56,6 +57,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.login.AccountSetupActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
@@ -81,27 +83,22 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private LatLng pickupLatLng; // Pick LatLng
     private Location mLastLocation; // Geo location
     private LocationRequest mLocationRequest; // Location reqquest
-
     // Switch
     private SwitchCompat switchHeroMode;
-
     // Status
     private int status = 0;
-
     // String variables
-    private String customerId = "";
+    private String userNameStr = null;
+    private String userProblemStr = null;
+    private String userPhoneStr = null;
     private String mUserType = null;
     private String userID;
-
     // Profile image
     private CircleImageView mProfileImage;
-
     // Logging out
     private Boolean isLoggingOut = false;
-
     // Layout
     private LinearLayout mCustomerInfo;
-
     // TextView
     private ImageView mCustomerProfileImage;
     private TextView mCustomerName;
@@ -109,24 +106,19 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private TextView mCustomerProblem;
     private TextView userName;
     private TextView userType;
-
     // DrawerLayout and Navigation view
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-
     // Shared preferences
     private SharedPreferences shared = null;
-
     // Firebase
     private FirebaseAuth mAuth;
     private DatabaseReference mUserInfoDatabase;
     private DatabaseReference mCustomerInfoDatabase;
     private DatabaseReference mHelpRequestDatabase;
-
     // Array lists
     private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
     private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.diet, R.mipmap.oxygen, R.mipmap.car, R.mipmap.superhero };
-
     // Marker map
     private Map<Marker, Object> markersMap = new HashMap<>();
 
@@ -177,7 +169,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         // Firebase database, user info database
         mUserInfoDatabase = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
-                .child(shared.getString(MyPreferenceManager.USER_TYPE, null))
+                .child(mUserType)
                 .child(userID);
         // Firebase database, help requests database
         mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference()
@@ -187,15 +179,10 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         mCustomerInfoDatabase = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
                 .child(MyPreferenceManager.REGULAR_USER);
-
         // Loads volunteer's information
-        loadUserInfo();
-
+        loadVolunteerInfo();
         // Fused location client initialized
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        checkLocationPermission();
-        // getAssignedCustomer();
     }
     //-----------------------------------------------------------------------------------------------------------------------
     private void initView() {
@@ -203,14 +190,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         // Setting on map ready callback interface
         mapFragment.getMapAsync(this);
-        // Customer layout information
-       /* mCustomerInfo = findViewById(R.id.customerInfo);
-        // Customer profile image
-        mCustomerProfileImage = findViewById(R.id.customerProfileImage);
-        // Customer name
-        mCustomerName = findViewById(R.id.customerName);*/
-        // Customer problem
-        mCustomerProblem = findViewById(R.id.customerProblem);
         // Switch widget
         switchHeroMode = findViewById(R.id.switchHeroMode);
         // Setting set on checked listener
@@ -243,10 +222,25 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
      *  Showing help requester information as bottom sheet dialog
      * */
     private void showBottomSheetDialog() {
+        // Root view
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null); // Inflates layout_bottom
-        BottomSheetDialog dialog = new BottomSheetDialog(this); // Creates bottom sheet dialog
+        // TextView
+        ((TextView)view.findViewById(R.id.nameTextView)).setText(userNameStr); // User name
+        ((TextView)view.findViewById(R.id.problemTextView)).setText(userProblemStr); // User's problem
+        ((TextView)view.findViewById(R.id.phoneTextView)).setText(userPhoneStr); // User's phone
+        // Help button
+        Button help = view.findViewById(R.id.helpButton);
+        final BottomSheetDialog dialog = new BottomSheetDialog(this); // Creates bottom sheet dialog
         dialog.setContentView(view); // Sets content
         dialog.show(); // Shows user information dialog
+        // Sets on click listener
+        help.setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View view) {
+                Toast.makeText(VolunteerMainActivity.this, "Help button clicked!", Toast.LENGTH_SHORT).show();
+                dialog.hide();
+            }
+        });
     }
     //-----------------------------------------------------------------------------------------------------------------------
     // Log out
@@ -262,7 +256,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     // 1 - User name
     // 2 - User phone number
     // 3 - User problem ( or a regular user, not volunteer)
-    private void loadUserInfo(){
+    private void loadVolunteerInfo(){
+        // Sets value event listener on the database
         mUserInfoDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -281,6 +276,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                                    .into(mProfileImage);
                         }
                     }
+                    // Null pointer exception thrown
                 } catch(NullPointerException error) {
                     Log.d("AccountSetupActivity", "onDataChange: error: "+error.getLocalizedMessage());
                 }
@@ -303,20 +299,12 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                     if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
                         // Map data structure
                         Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-
-                        Toast.makeText(VolunteerMainActivity.this, "name: "+ map.get("name").toString(), Toast.LENGTH_SHORT).show();
-
-                      /*  // User name
-                        if (map.get("name") != null) {
-                            userName.setText(map.get("name").toString());
-                        }
-                        // User profile image URI
-                        if (map.get("profileImageUrl") != null) {
-                            Glide.with(getApplication())
-                                    .load(Uri.parse(map.get("profileImageUrl").toString()))
-                                    .into(mProfileImage);
-                        }*/
+                        userNameStr = map.get("name").toString(); // Getting user name
+                        userProblemStr = map.get("problem").toString(); // Getting user's problem
+                        userPhoneStr = map.get("phone").toString(); // Getting user's phone
+                        showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
                     }
+                    // Null pointer exception thrown
                 } catch(NullPointerException error) {
                     Log.d("AccountSetupActivity", "onDataChange: error: "+error.getLocalizedMessage());
                 }
@@ -325,67 +313,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Cancelled
-            }
-        });
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------
-    Marker pickupMarker;
-    private DatabaseReference assignedCustomerPickupLocationRef;
-    private ValueEventListener assignedCustomerPickupLocationRefListener;
-
-    private void getAssignedCustomerPickupLocation() {
-        assignedCustomerPickupLocationRef = FirebaseDatabase.getInstance().getReference().child("customerRequest").child(customerId).child("l");
-        assignedCustomerPickupLocationRefListener = assignedCustomerPickupLocationRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists() && !customerId.equals("")) {
-                    List<Object> map = (List<Object>) dataSnapshot.getValue();
-                    double locationLat = 0;
-                    double locationLng = 0;
-                    if (map.get(0) != null) {
-                        locationLat = Double.parseDouble(map.get(0).toString());
-                    }
-                    if (map.get(1) != null) {
-                        locationLng = Double.parseDouble(map.get(1).toString());
-                    }
-                    pickupLatLng = new LatLng(locationLat, locationLng);
-                    pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLatLng).title("Help location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)));
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    // Gets assigned customer info
-    private void getAssignedCustomerInfo() {
-        mCustomerInfo.setVisibility(View.VISIBLE);
-        DatabaseReference mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(customerId);
-        mCustomerDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
-                    Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-                    if (map.get("name") != null) {
-                        mCustomerName.setText(map.get("name").toString());
-                    }
-                    if (map.get("phone") != null) {
-                        mCustomerPhone.setText(map.get("phone").toString());
-                    }
-                    if (map.get("profileImageUrl") != null) {
-                        Glide.with(getApplication()).load(map.get("profileImageUrl").toString()).into(mCustomerProfileImage);
-                    }
-                    if (map.get("problem") != null) {
-                        mCustomerProblem.setText(map.get("problem").toString());
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
             }
         });
     }
@@ -398,8 +325,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                // Loads the selected user's information
                 loadCustomerInformation(markersMap.get(marker).toString());
-                showBottomSheetDialog();
                 return true;
             }
         });
@@ -415,6 +342,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Iterates through all child snapshots
                 for(DataSnapshot child : snapshot.getChildren()) {
+                    // Adds all of help markers to the map
                     addHelpRequestMarkers(child.getKey(), (Map<String, Object>) child.getValue());
                 }
             }
@@ -427,9 +355,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
 
         // Requests permission
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                // ...
-            } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 checkLocationPermission();
             }
         }
@@ -470,45 +396,18 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             }
         }
     };
-    /*  String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-              DatabaseReference refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable");
-              DatabaseReference refWorking = FirebaseDatabase.getInstance().getReference("driversWorking");
-              GeoFire geoFireAvailable = new GeoFire(refAvailable);
-              GeoFire geoFireWorking = new GeoFire(refWorking);
-
-              switch (customerId) {
-                  case "":
-                      geoFireWorking.removeLocation(userId);
-                      geoFireAvailable.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-                      break;
-
-                  default:
-                      geoFireAvailable.removeLocation(userId);
-                      geoFireWorking.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-                      break;
-              }*/
     //-----------------------------------------------------------------------------------------------------------------------
     // Check geo location permission
     private void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("give permission")
-                        .setMessage("give permission message")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                            }
-                        })
-                        .create()
-                        .show();
-            } else {
                 ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
     }
-
+    // On request permissions result
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -533,7 +432,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
         mMap.setMyLocationEnabled(true);
     }
-
     // Disconnects driver
     private void disconnectDriver() {
         if (mFusedLocationClient != null) {
@@ -541,12 +439,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         }
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("driversAvailable");
-
         GeoFire geoFire = new GeoFire(ref);
         geoFire.removeLocation(userId);
     }
-
-
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
