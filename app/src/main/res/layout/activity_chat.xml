@@ -19,6 +19,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/chatList"
+            tools:listitem="@layout/message_item"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp" />
@@ -41,6 +42,7 @@
                 android:layout_weight="1" />
 
             <ImageView
+                android:id="@+id/sendMessage"
                 app:srcCompat="@drawable/ic_send_message_icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
