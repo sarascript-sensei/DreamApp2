@@ -1,8 +1,6 @@
 package com.unicef.dreamapp2.ui.main.main;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -16,13 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
@@ -33,7 +28,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.bumptech.glide.Glide;
 import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -55,17 +49,18 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
-import com.unicef.dreamapp2.ui.login.AccountSetupActivity;
+import com.unicef.dreamapp2.ui.chat.ChatActivity;
+import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -92,7 +87,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private String userProblemStr = null;
     private String userPhoneStr = null;
     private String mUserType = null;
-    private String userID;
+    private String userID = null;
+    private String customerID = null;
     // Profile image
     private CircleImageView mProfileImage;
     // Logging out
@@ -140,7 +136,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                             break;
                             // Edit profile
                         case R.id.change_profile:
-                            startActivity(new Intent(VolunteerMainActivity.this, AccountSetupActivity.class));
+                            startActivity(new Intent(VolunteerMainActivity.this, ProfileActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Logs out
@@ -237,8 +233,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         help.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
-                Toast.makeText(VolunteerMainActivity.this, "Help button clicked!", Toast.LENGTH_SHORT).show();
                 dialog.hide();
+                startChatActivity(customerID);
             }
         });
     }
@@ -316,6 +312,13 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             }
         });
     }
+    // Start chat with the chosen customer
+    private void startChatActivity(String uid) {
+        Intent intent = new Intent(VolunteerMainActivity.this, ChatActivity.class);
+        intent.putExtra("customerID", customerID);
+        intent.putExtra("volunteerID", userID);
+        startActivity(intent);
+    }
     //-----------------------------------------------------------------------------------------------------------------------
     // Map ready
     @Override
@@ -326,7 +329,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             @Override
             public boolean onMarkerClick(Marker marker) {
                 // Loads the selected user's information
-                loadCustomerInformation(markersMap.get(marker).toString());
+                customerID = Objects.requireNonNull(markersMap.get(marker)).toString();
+                loadCustomerInformation(customerID); // Passes customer ID to load profile information
                 return true;
             }
         });

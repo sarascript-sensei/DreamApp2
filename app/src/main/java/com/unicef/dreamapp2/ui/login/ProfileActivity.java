@@ -9,7 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,8 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.mikhaellopez.circularimageview.CircularImageView;
-import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.ui.main.main.CustomerMainActivity;
 import com.unicef.dreamapp2.ui.main.main.VolunteerMainActivity;
@@ -37,7 +36,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  *
  * */
 
-public class AccountSetupActivity extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity {
 
     // Request code
     private static final int GALLERY_RQUEST_CODE = 0;
@@ -193,6 +192,7 @@ public class AccountSetupActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Cancelled
+                Toast.makeText(ProfileActivity.this, "Произошла ошибка.", Toast.LENGTH_SHORT).show();
             }
         });
     }

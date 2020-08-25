@@ -20,6 +20,7 @@
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switchHeroMode"
+                android:textColor="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Режим Героя"

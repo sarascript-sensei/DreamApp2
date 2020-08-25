@@ -14,6 +14,7 @@
         android:layout_width="@dimen/button_width"
         android:layout_height="@dimen/button_height"
         android:inputType="textCapSentences"
+        android:textColor="@color/colorPrimaryDark"
         android:onClick="openVolunteerLogin"
         android:textSize="16dp"
         android:text="Я хочу помочь" />
@@ -21,9 +22,11 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/personBtn"
         android:background="@drawable/keypad_bg"
+        android:layout_marginTop="20dp"
         android:layout_width="@dimen/button_width"
         android:layout_height="@dimen/button_height"
         android:inputType="textCapSentences"
+        android:textColor="@color/colorPrimaryDark"
         android:onClick="openRegularLogin"
         android:textSize="16dp"
         android:text="Мне нужна помощь" />

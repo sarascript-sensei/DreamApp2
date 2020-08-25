@@ -49,8 +49,10 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/registerButton"
         android:background="@drawable/keypad_bg"
+        android:layout_margin="10dp"
         android:layout_width="@dimen/button_width"
         android:layout_height="@dimen/button_height"
+        android:textColor="@color/colorPrimaryDark"
         android:onClick="onClickVerify"
         android:inputType="textCapSentences"
         android:textSize="16dp"

@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
-import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 
 import java.util.concurrent.TimeUnit;
@@ -152,7 +152,7 @@ public class CodeActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Intent intent = new Intent(CodeActivity.this, AccountSetupActivity.class);
+                            Intent intent = new Intent(CodeActivity.this, ProfileActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             intent.putExtra("setup", true);
                             startActivity(intent);

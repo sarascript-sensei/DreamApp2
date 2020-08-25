@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.hbb20.CountryCodePicker;
-import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 
 public class PhoneActivity extends AppCompatActivity {

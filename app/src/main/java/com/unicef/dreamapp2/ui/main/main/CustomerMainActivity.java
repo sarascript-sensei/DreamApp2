@@ -15,8 +15,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -44,6 +42,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -51,18 +51,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.mikhaellopez.circularimageview.CircularImageView;
-import com.unicef.dreamapp2.MyPreferenceManager;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
-import com.unicef.dreamapp2.ui.login.AccountSetupActivity;
+import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -86,7 +82,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
     // Logging out boolean variable
     private Boolean isLoggingOut = false;
-    private Boolean requestBol = false;
+    private Boolean isCancellable = false;
 
     // What Marker is that?
     private Marker pickupMarker;
@@ -153,7 +149,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             break;
                             // Change profile
                         case R.id.change_profile:
-                            startActivity(new Intent(CustomerMainActivity.this, AccountSetupActivity.class));
+                            startActivity(new Intent(CustomerMainActivity.this, ProfileActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Logout
@@ -205,7 +201,12 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         mRequest.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
-                requestHelp();
+                // Help request is cancellable
+                if (isCancellable) {
+                    cancelRequest(); // Cancel request
+                } else {
+                    requestHelp(); // Request help
+                }
             }
         });
     }
@@ -246,12 +247,13 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     //--------------------------------------------------------------------------------------------------------------------------
     // On help request button click
     private void requestHelp() {
+        isCancellable = true;
         // Location latitude and longitude
         GeoFire geoFire = new GeoFire(mHelpRequestDatabase);
         geoFire.setLocation(userID, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
         // LatLng object creation
         pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        // Creating a list
+        // Creating a dialog list of help forms
         markerOptions = new MarkerOptions(); // Marker options
         markerOptions.position(pickupLocation); // Sets the location
         // Alert dialog builder
@@ -264,11 +266,30 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                 setMarkerOption(list[id], id); // Sets marker option
                 mHelpRequestDatabase.child(userID).child("iconId").setValue(id); // Id of option marker
                 mHelpRequestDatabase.child(userID).child("problem").setValue(list[id]); // Updates problem in Firebase database
+                // Informs the user that the search for volunteers has begun
+                mRequest.setText("отмена");
+            }
+        });
+        // Clear traces on cancellation
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                cancelRequest();
             }
         });
         builder.create().show();  // Create and show the alert dialog
-        // Informs the user that the search for volunteers has begun
-        mRequest.setText("отмена");
+    }
+
+    // Cancels the help request
+    private void cancelRequest() {
+        mHelpRequestDatabase.child(userID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                mMap.clear();
+                mRequest.setText("мне нужна помощь");
+                isCancellable = false;
+            }
+        });
     }
 
     // Loads user profile information from Firebase database
@@ -307,22 +328,28 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     // Loads user's help location (lat, long)
     private void loadHelpLocation() {
         mHelpRequestDatabase.child(userID).addValueEventListener(new ValueEventListener() {
+            // On data change
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 try {
+                    // If snapshot exists
                     if(snapshot.exists() && snapshot.getChildrenCount()>0) {
+                        isCancellable = true;
                         // Map data structure
                         Map<String, Object> map = (Map<String, Object>) snapshot.getValue();
                         // Longitude and latitude
-                        ArrayList<Double> list = (ArrayList<Double> )map.get("l");
-                        pickupLocation = new LatLng(list.get(0), list.get(1));
+                        ArrayList<Double> list = (ArrayList<Double> )map.get("l"); // Gets list of latitude and longitude
+                        pickupLocation = new LatLng(list.get(0), list.get(1)); // Latitude and longitude
                         MarkerOptions markerOptions = new MarkerOptions(); // Marker options
                         markerOptions.position(pickupLocation); // Sets the location
                         int id = Integer.parseInt(map.get("iconId").toString());
+                        // Adds marker to the map
                         mMap.clear();
-                        markerOptions.title(map.get("problem").toString())
-                             .icon(BitmapDescriptorFactory.fromResource(icons[id]));
-                        mMap.addMarker(markerOptions);
+                        markerOptions.title(map.get("problem").toString()).icon(BitmapDescriptorFactory
+                                .fromResource(icons[id]));
+                        mMap.addMarker(markerOptions); // Adds the marker to the map
+                        // There was help request so it can be cancelled now
+                        mRequest.setText("отмена");
                     }
                 } catch(NullPointerException error) {
                     Log.d("CustomerMainActivity", "onDataChange (loadHelpLocation): error: "+error.getLocalizedMessage());
@@ -331,13 +358,13 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                // Cancelled
             }
         });
     }
     //--------------------------------------------------------------------------------------------------------------------------------------
     private void logout() {
-        isLoggingOut = true;
+        isLoggingOut = true; // Logging out
         FirebaseAuth.getInstance().signOut(); // Signs out from Firebase
         startActivity(new Intent(this, WelcomeActivity.class)); // Returns to WelcomeActivity
         finish(); // Finishes the current activity

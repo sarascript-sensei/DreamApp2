@@ -1,4 +1,4 @@
-package com.unicef.dreamapp2;
+package com.unicef.dreamapp2.application;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -13,6 +13,9 @@
 
     <Button
         android:id="@+id/request"
+        android:background="@drawable/keypad_bg"
+        android:layout_margin="5dp"
+        android:textColor="@color/colorPrimaryDark"
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
