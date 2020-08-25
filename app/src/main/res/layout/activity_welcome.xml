@@ -5,28 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/help1"
     android:gravity="center"
     tools:context=".ui.welcome.WelcomeActivity">
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/volunteerBtn"
-        android:background="@drawable/keypad_bg"
+        android:background="@drawable/keypad_bg2"
         android:layout_width="@dimen/button_width"
         android:layout_height="@dimen/button_height"
+        android:gravity="center"
         android:inputType="textCapSentences"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/white"
         android:onClick="openVolunteerLogin"
         android:textSize="16dp"
         android:text="Я хочу помочь" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/personBtn"
-        android:background="@drawable/keypad_bg"
+        android:background="@drawable/keypad_bg2"
         android:layout_marginTop="20dp"
         android:layout_width="@dimen/button_width"
         android:layout_height="@dimen/button_height"
+        android:gravity="center"
         android:inputType="textCapSentences"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/white"
         android:onClick="openRegularLogin"
         android:textSize="16dp"
         android:text="Мне нужна помощь" />
