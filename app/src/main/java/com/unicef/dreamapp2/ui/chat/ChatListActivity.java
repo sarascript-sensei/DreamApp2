@@ -6,6 +6,9 @@ import android.os.Bundle;
 
 import com.unicef.dreamapp2.R;
 
+/**
+ * @author Iman Augustine*/
+
 public class ChatListActivity extends AppCompatActivity {
 
     @Override

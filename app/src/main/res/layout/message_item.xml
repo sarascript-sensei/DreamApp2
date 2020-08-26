@@ -7,7 +7,7 @@
     android:padding="5dp">
 
     <TextView
-        android:id="@+id/messageTextTwo"
+        android:id="@+id/messageText1"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -17,10 +17,10 @@
         android:padding="10dp"
         android:textColor="@color/white"
         android:textSize="16dp"
-        android:text="\tВы можете мне почочь?" />
+        android:text="Iman Uulu:\nВы можете мне почочь?" />
 
     <TextView
-        android:id="@+id/messageText"
+        android:id="@+id/messageText2"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -30,7 +30,7 @@
         android:padding="10dp"
         android:textColor="@color/white"
         android:textSize="16dp"
-        android:text="\tКонечно я же супер герой я супермен!!! Так где вы?"
+        android:text="Вы:\nКонечно я же супер герой я супермен!!! Так где вы?"
       />
 
 </RelativeLayout>

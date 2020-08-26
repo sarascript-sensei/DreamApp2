@@ -8,9 +8,9 @@
         android:color="@color/colorPrimaryDark"/>
 
     <corners
-        android:bottomRightRadius="20dp"
-        android:topRightRadius="20dp"
-        android:topLeftRadius="20dp"/>
+        android:bottomRightRadius="@dimen/radius"
+        android:topRightRadius="@dimen/radius"
+        android:topLeftRadius="@dimen/radius"/>
 </shape>
     </item>
 </layer-list>

@@ -12,7 +12,7 @@
     </solid>
 
     <corners
-        android:radius="@dimen/button_radius" >
+        android:radius="20dp" >
     </corners>
 
 </shape>

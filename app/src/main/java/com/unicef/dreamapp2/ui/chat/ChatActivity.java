@@ -2,8 +2,11 @@ package com.unicef.dreamapp2.ui.chat;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,11 +20,20 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.adapter.MessageAdapter;
+import com.unicef.dreamapp2.application.MyApplication;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.model.ChatModel;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author Iman Augustine
@@ -33,6 +45,8 @@ import java.util.Objects;
  * */
 
 public class ChatActivity extends AppCompatActivity {
+
+    private static final String TAG = "ChatActivity";
 
     // Firebase database reference
     private DatabaseReference messageRef;
@@ -46,6 +60,9 @@ public class ChatActivity extends AppCompatActivity {
     private String volunteerID = null;
     private String chatID = null;
     private String key = null;
+
+    // RecyclerView
+    private RecyclerView messageList;
 
     // ImageView
     private ImageView sendBtn;
@@ -75,20 +92,25 @@ public class ChatActivity extends AppCompatActivity {
         // Initializes views
         initView();
 
-        // Sets up listeners
-        setUpListeners();
+        // Adapter
+        messageAdapter = new MessageAdapter(new ArrayList<String>(), MyApplication.getInstance());
+        messageList.setLayoutManager(new LinearLayoutManager(this));
+        messageList.setAdapter(messageAdapter);
 
         // Creating chat model
         chatModel = new ChatModel();
         chatModel.senderId = FirebaseAuth.getInstance().getUid(); // The sender's uid
         chatModel.messageType = MESSAGE_TYPE; // Message type should be TEXT
 
+        // Sets up listeners
+        setUpListeners();
     }
 
     // Initializes views
     private void initView() {
         sendBtn = findViewById(R.id.sendMessage); // Send button
         messageEdit = findViewById(R.id.messageEdit); // Message text edit
+        messageList = findViewById(R.id.messageList); // RecyclerView
     }
 
     // Sets up listeners on widgets
@@ -107,7 +129,9 @@ public class ChatActivity extends AppCompatActivity {
             // On data change
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // extractArrayList(snapshot);
+                messageAdapter.setValues(extractMessageList(snapshot));
+                messageAdapter.notifyDataSetChanged();
+                // Log.d(TAG, "extractArrayList: "+snapshot.toString());
             }
 
             // On cancellation
@@ -123,32 +147,42 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(String message) {
         if(!message.isEmpty()) { // If there's a message text entered
             key = messageRef.push().getKey(); // Gets generated key
-            //messageRef.child(key); // Generated key
             chatModel.chatId = key; // Chat id set to key
             chatModel.messageId = key; // Message id
             chatModel.message = message; // Message body
             messageRef.child(chatID).child(key).setValue(chatModel); // "Sending" the actual message
             messageEdit.setText(null); // Resetting mesage text field
         } else {
+            // Prompt the user to enter message
             Toast.makeText(this, "Введите сообщение!", Toast.LENGTH_SHORT).show();
         }
     }
 
     // Extract array list from the map returned on data change in Firebase
-    private void extractArrayList(DataSnapshot snapshot) {
+    private ArrayList<String> extractMessageList(DataSnapshot snapshot) {
+        ArrayList<String> messagesList = new ArrayList<>();
+        HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
+        HashMap<String, Object> chatMap = (HashMap<String, Object>) map.get(chatID);
+        HashMap<String, Object> messages;
+        Object[] keySet = (Object[]) chatMap.keySet().toArray();
+
         StringBuilder message = new StringBuilder();
-        for(DataSnapshot child : snapshot.getChildren()) {
-            Map<String, Object> map = (Map<String, Object>) child.getValue();
-            message.append(map.keySet()).append("\n");
+        for(int i=0; i<keySet.length; i++) {
+            messages = (HashMap<String, Object>) chatMap.get(keySet[i].toString());
+            // message.append(messages.get("message").toString()).append("\n");
+            messagesList.add(messages.get("message").toString());
         }
-        Toast.makeText(this, message.toString(), Toast.LENGTH_LONG).show();
+        // Log.d(TAG, "extractArrayList: " + messagesList.toString());
+        return messagesList;
     }
 
+    // On pause
     @Override
     protected void onPause() {
         super.onPause();
     }
 
+    // On destroy
     @Override
     protected void onDestroy() {
         super.onDestroy();
