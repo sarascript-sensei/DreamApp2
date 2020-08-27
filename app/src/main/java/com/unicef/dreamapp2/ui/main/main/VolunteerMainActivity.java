@@ -321,6 +321,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     // Start chat with the chosen customer
     private void startChatActivity(String uid) {
         Intent intent = new Intent(VolunteerMainActivity.this, ChatActivity.class);
+        intent.putExtra("chatterName", userNameStr);
         intent.putExtra("customerID", customerID);
         intent.putExtra("volunteerID", userID);
         startActivity(intent);

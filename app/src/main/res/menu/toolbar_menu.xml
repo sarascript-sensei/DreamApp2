@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/clear"
+        android:title="Удалить"
+        android:orderInCategory="79"
+        android:icon="@drawable/ic_outline_clear_24"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/thank"
+        android:title="Благодарен"
+        android:orderInCategory="79"
+        android:icon="@drawable/ic_outline_check_24"
+        app:showAsAction="ifRoom|withText" />
+</menu>

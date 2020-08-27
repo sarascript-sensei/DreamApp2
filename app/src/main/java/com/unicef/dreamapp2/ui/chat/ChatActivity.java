@@ -5,9 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -50,6 +54,8 @@ public class ChatActivity extends AppCompatActivity {
 
     // Firebase database reference
     private DatabaseReference messageRef;
+    private DatabaseReference customerDatabase;
+    private DatabaseReference volunteerDatabase;
 
     // Adapters
     private MessageAdapter messageAdapter;
@@ -58,11 +64,13 @@ public class ChatActivity extends AppCompatActivity {
     public static final String MESSAGE_TYPE = "TEXT";
     private String customerID = null;
     private String volunteerID = null;
+    private String chatterName = null;
     private String chatID = null;
     private String key = null;
 
     // RecyclerView
     private RecyclerView messageList;
+    private LinearLayoutManager layoutManager; // layout manager
 
     // ImageView
     private ImageView sendBtn;
@@ -82,7 +90,12 @@ public class ChatActivity extends AppCompatActivity {
         // Accessing customer and volunteer id's
         customerID = getIntent().getStringExtra("customerID"); // Customer ID
         volunteerID = getIntent().getStringExtra("volunteerID"); // Volunteer ID
+        chatterName = getIntent().getStringExtra("chatterName"); // Chatter name
         chatID = customerID + "_" + volunteerID; // Conjured up chat id
+
+        // Setting correspondent's name as toolbar title and enabling home button
+        getSupportActionBar().setTitle(chatterName);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Firebase database
         messageRef = FirebaseDatabase.getInstance().getReference()
@@ -93,9 +106,10 @@ public class ChatActivity extends AppCompatActivity {
         initView();
 
         // Adapter
-        messageAdapter = new MessageAdapter(new ArrayList<String>(), MyApplication.getInstance());
-        messageList.setLayoutManager(new LinearLayoutManager(this));
-        messageList.setAdapter(messageAdapter);
+        layoutManager = new LinearLayoutManager(this); // Linear layout manager
+        messageAdapter = new MessageAdapter(new ArrayList<String>(), MyApplication.getInstance()); // Messages adapter
+        messageList.setLayoutManager(layoutManager); // Setting layout manager
+        messageList.setAdapter(messageAdapter); // Setting messages adapter
 
         // Creating chat model
         chatModel = new ChatModel();
@@ -106,10 +120,36 @@ public class ChatActivity extends AppCompatActivity {
         setUpListeners();
     }
 
+    // Toolbar menu inflated
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
+
+    // On options item selected
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.thank: // User is thankful for the volunteer
+                Toast.makeText(this, "Thank you!", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.clear: // Did not help or did it badly
+                Toast.makeText(this, "I am not very thankful!", Toast.LENGTH_SHORT).show();
+                break;
+            case android.R.id.home: // On home arrow pressed
+                finish();
+        }
+        return true;
+    }
+
     // Initializes views
     private void initView() {
         sendBtn = findViewById(R.id.sendMessage); // Send button
         messageEdit = findViewById(R.id.messageEdit); // Message text edit
+        messageEdit.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         messageList = findViewById(R.id.messageList); // RecyclerView
     }
 
@@ -129,9 +169,17 @@ public class ChatActivity extends AppCompatActivity {
             // On data change
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                messageAdapter.setValues(extractMessageList(snapshot));
-                messageAdapter.notifyDataSetChanged();
-                // Log.d(TAG, "extractArrayList: "+snapshot.toString());
+                // If there is any data
+                if(snapshot.exists() && snapshot.getChildrenCount()>0) {
+                    ArrayList<String> messages = extractMessageList(snapshot); // Extracts messages list
+                    if(messages.size()>0) { // If there is at least one message
+                        messageAdapter.setValues(messages); // Sets adapter's value to the messages list
+                        layoutManager.smoothScrollToPosition(messageList, null, messages.size() - 1); // Scrolls down to the last message
+                        messageAdapter.notifyDataSetChanged(); // Notifies the adapter of changes
+                    }
+                } else { // No chats at all
+                    Log.d(TAG, "onDataChange: completely no conversations. Not a problem, we are the first users of the app.");
+                }
             }
 
             // On cancellation
@@ -163,16 +211,18 @@ public class ChatActivity extends AppCompatActivity {
         ArrayList<String> messagesList = new ArrayList<>();
         HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
         HashMap<String, Object> chatMap = (HashMap<String, Object>) map.get(chatID);
-        HashMap<String, Object> messages;
-        Object[] keySet = (Object[]) chatMap.keySet().toArray();
+        if(chatMap!=null) {
+            HashMap<String, Object> messages;
+            Object[] keySet = chatMap.keySet().toArray();
 
-        StringBuilder message = new StringBuilder();
-        for(int i=0; i<keySet.length; i++) {
-            messages = (HashMap<String, Object>) chatMap.get(keySet[i].toString());
-            // message.append(messages.get("message").toString()).append("\n");
-            messagesList.add(messages.get("message").toString());
+            StringBuilder message = new StringBuilder();
+            for (int i = 0; i < keySet.length; i++) {
+                messages = (HashMap<String, Object>) chatMap.get(keySet[i].toString());
+                // message.append(messages.get("message").toString()).append("\n");
+                messagesList.add(messages.get("message").toString());
+            }
+            // Log.d(TAG, "extractArrayList: " + messagesList.toString());
         }
-        // Log.d(TAG, "extractArrayList: " + messagesList.toString());
         return messagesList;
     }
 
@@ -186,5 +236,11 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }
