@@ -3,8 +3,10 @@ package com.unicef.dreamapp2.ui.login;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,9 +25,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.ui.main.main.CustomerMainActivity;
 import com.unicef.dreamapp2.ui.main.main.VolunteerMainActivity;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,11 +64,11 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference mCustomerDatabase;
 
     // String variables
-    private String userID;
-    private String mName;
-    private String mPhone;
-    private String mProfileImageUrl;
-    private String mProblem;
+    private String userID = null;
+    private String mName = null;
+    private String mPhone = null;
+    private String imageBase64 = null;
+    private String mProblem = null;
     private String mUserType = null;
 
     // Image URI
@@ -146,7 +150,12 @@ public class ProfileActivity extends AppCompatActivity {
         if(requestCode == GALLERY_RQUEST_CODE && resultCode == Activity.RESULT_OK)
         {
             resultUri = data.getData(); // ImageU URI
-            // mProfileImage.setImageURI(resultUri); // Showing the profile image
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                imageBase64 = Utility.getBase64FromBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Glide.with(getApplication()).load(resultUri).into(mProfileImage); // Showing the profile image
         }
     }
@@ -180,8 +189,10 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
-                            mProfileImageUrl = map.get("profileImageUrl").toString();
-                            Glide.with(getApplication()).load(Uri.parse(mProfileImageUrl)).into(mProfileImage);
+                            imageBase64 = map.get("profileImageUrl").toString();
+                            Glide.with(getApplication())
+                                    .load(Utility.getBitmapFromBase64(imageBase64))
+                                    .into(mProfileImage);
                         }
                     }
                 } catch(NullPointerException error) {
@@ -224,8 +235,8 @@ public class ProfileActivity extends AppCompatActivity {
         userInfo.put("problem", mProblem);
 
         // Saving path to the profile image
-        if(resultUri!=null) {
-            userInfo.put("profileImageUrl", resultUri.toString());
+        if(imageBase64!=null) {
+            userInfo.put("profileImageUrl", imageBase64);
         }
 
         // If entered data is valid

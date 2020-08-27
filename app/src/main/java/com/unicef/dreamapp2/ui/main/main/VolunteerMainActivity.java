@@ -51,6 +51,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChatActivity;
@@ -65,7 +66,7 @@ import java.util.Objects;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
- * @author Tan Ton
+ * @author Iman Augustine
  *
  * VolunteerMainActivity extends FragmentActivity.
  * */
@@ -89,6 +90,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private String mUserType = null;
     private String userID = null;
     private String customerID = null;
+    private String imageBase64 = null;
     // Profile image
     private CircleImageView mProfileImage;
     // Logging out
@@ -224,6 +226,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         ((TextView)view.findViewById(R.id.nameTextView)).setText(userNameStr); // User name
         ((TextView)view.findViewById(R.id.problemTextView)).setText(userProblemStr); // User's problem
         ((TextView)view.findViewById(R.id.phoneTextView)).setText(userPhoneStr); // User's phone
+        Glide.with(getApplication())
+                .load(Utility.getBitmapFromBase64(imageBase64))
+                .into(((CircleImageView)view.findViewById(R.id.profilePicture))); // Setting user profile image
         // Help button
         Button help = view.findViewById(R.id.helpButton);
         final BottomSheetDialog dialog = new BottomSheetDialog(this); // Creates bottom sheet dialog
@@ -267,9 +272,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         }
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
-                           Glide.with(getApplication())
-                                   .load(Uri.parse(map.get("profileImageUrl").toString()))
-                                   .into(mProfileImage);
+                            Glide.with(getApplication()).load(Utility.getBitmapFromBase64(
+                                    map.get("profileImageUrl").toString()))
+                                    .into(mProfileImage);
                         }
                     }
                     // Null pointer exception thrown
@@ -298,6 +303,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         userNameStr = map.get("name").toString(); // Getting user name
                         userProblemStr = map.get("problem").toString(); // Getting user's problem
                         userPhoneStr = map.get("phone").toString(); // Getting user's phone
+                        imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
                         showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
                     }
                     // Null pointer exception thrown

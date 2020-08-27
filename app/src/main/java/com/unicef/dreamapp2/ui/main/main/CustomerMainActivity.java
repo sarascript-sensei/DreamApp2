@@ -53,6 +53,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
@@ -310,8 +311,11 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                         }
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
-                            Glide.with(getApplication()).load(Uri.parse(map.get("profileImageUrl").toString())).into(mProfileImage);
-                        }
+                            // imageBase64 = map.get("profileImageUrl").toString();
+                            Glide.with(getApplication())
+                                    .load(Utility.getBitmapFromBase64(
+                                            map.get("profileImageUrl").toString()))
+                                    .into(mProfileImage);                        }
                     }
                 } catch(NullPointerException error) {
                     Log.d("CustomerMainActivity", "onDataChange: error: "+error.getLocalizedMessage());
