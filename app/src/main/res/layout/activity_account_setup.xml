@@ -135,7 +135,8 @@
                 android:paddingRight="13dp"
                 android:textColor="@color/white"
                 android:background="@color/transparent"
-                android:hint="Номер"
+                android:text="+996"
+                android:hint="Номер (с кодом страны)"
                 android:inputType="phone"
                 android:singleLine="true" />
         </LinearLayout>

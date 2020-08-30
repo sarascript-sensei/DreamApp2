@@ -14,7 +14,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="430dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -36,6 +36,8 @@
                 android:layout_height="90dp"
                 android:scaleType="centerCrop"
                 android:layout_marginTop="16dp"
+                app:civ_border_width="1dp"
+                app:civ_border_color="@color/colorPrimary"
                 android:layout_marginBottom="16dp"
                 app:civ_border="false"
                 android:src="@drawable/picture"/>
@@ -49,6 +51,7 @@
             android:layout_marginEnd="16dp"
             android:paddingLeft="13dp"
             android:paddingRight="13dp"
+            android:textColor="@color/black"
             android:textSize="16dp"
             android:text="Ф.И.О"
             app:layout_constraintTop_toBottomOf="@id/userPictureCard"
@@ -65,6 +68,7 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:paddingLeft="13dp"
+            android:textColor="@color/black"
             android:paddingRight="13dp"
             android:textSize="16dp"
             android:text="Проблема"
@@ -86,6 +90,7 @@
             android:paddingLeft="13dp"
             android:paddingRight="13dp"
             android:textSize="16dp"
+            android:textColor="@color/black"
             android:text="Номер телефона"
             app:layout_constraintTop_toBottomOf="@id/problemTextView"
             app:layout_constraintStart_toStartOf="parent"
@@ -96,19 +101,51 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/helpButton"
-            android:layout_width="@dimen/button_width"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
-            android:background="@drawable/keypad_bg"
-            android:textColor="@color/colorPrimary"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            app:layout_constraintTop_toBottomOf="@id/phoneTextView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/button_background"
             android:inputType="textCapSentences"
             android:text="Помочь"
-            android:textSize="18dp" />
+            android:textColor="@color/white"
+            android:textSize="18dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/phoneTextView"
+            app:layout_constraintVertical_bias="0.213" />
+
+        <LinearLayout
+            android:id="@+id/contactLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/helpButton"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/call"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/icons8_phone_64"/>
+            <ImageButton
+                android:id="@+id/whatsapp"
+                android:layout_marginStart="30dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/icons8_whatsapp_64"/>
+            <ImageButton
+                android:id="@+id/telegram"
+                android:layout_marginStart="30dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/ic_icons8_telegram_app"
+                android:visibility="gone"/>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

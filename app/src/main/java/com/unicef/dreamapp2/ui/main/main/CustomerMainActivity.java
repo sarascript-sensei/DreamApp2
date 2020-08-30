@@ -121,7 +121,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
     // Firebase
     private FirebaseAuth mAuth;
-    private DatabaseReference mCustomerDatabase;
+    private DatabaseReference mUserInfoDatabase;
     private DatabaseReference mHelpRequestDatabase;
     private String userID;
 
@@ -129,7 +129,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     private MarkerOptions markerOptions;
     // Array lists
     private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
-    private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.diet, R.mipmap.oxygen, R.mipmap.car, R.mipmap.superhero };
+    private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.burger, R.mipmap.oxygen, R.mipmap.car, R.mipmap.sos };
     //------------------------------DRAWER-LAYOUT-NAVIGATION-LISTENER------------------------------------------------------
 
     // On navigation item selected listener in the drawer layout
@@ -182,12 +182,16 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
         // Firebase realtime database
         mAuth = FirebaseAuth.getInstance();
+
         // User ID
         userID = mAuth.getCurrentUser().getUid();
+
         // Firebase databases
-        mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
-                .child(shared.getString(MyPreferenceManager.USER_TYPE, null))
+        mUserInfoDatabase = FirebaseDatabase.getInstance().getReference()
+                .child("Users")
+                .child(mUserType)
                 .child(userID);
+
         // Help requests database
         mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference().child("Users")
                 .child("HelpRequests");
@@ -298,7 +302,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     // 2 - User phone number
     // 3 - User problem ( or a regular user, not volunteer)
     private void loadUserInfo(){
-        mCustomerDatabase.addValueEventListener(new ValueEventListener() {
+        mUserInfoDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
@@ -312,9 +316,8 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
                             // imageBase64 = map.get("profileImageUrl").toString();
-                            Glide.with(getApplication())
-                                    .load(Utility.getBitmapFromBase64(
-                                            map.get("profileImageUrl").toString()))
+                            Glide.with(getApplication()).load(Utility.getBitmapFromBase64(
+                                    map.get("profileImageUrl").toString()))
                                     .into(mProfileImage);                        }
                     }
                 } catch(NullPointerException error) {

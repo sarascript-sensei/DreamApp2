@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -116,7 +117,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private DatabaseReference mHelpRequestDatabase;
     // Array lists
     private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
-    private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.diet, R.mipmap.oxygen, R.mipmap.car, R.mipmap.superhero };
+    private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.burger, R.mipmap.oxygen, R.mipmap.car, R.mipmap.sos };
     // Marker map
     private Map<Marker, Object> markersMap = new HashMap<>();
 
@@ -242,6 +243,51 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                 startChatActivity(customerID);
             }
         });
+        // Call on click
+        ((ImageButton)view.findViewById(R.id.call)).setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View view) {
+                makeCall(); // Call
+            }
+        });
+        // Send a message in WhatsApp
+        ((ImageButton)view.findViewById(R.id.whatsapp)).setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View view) {
+                sendWhatsapp(); // Launch WhatsApp
+            }
+        });
+        // Send a message in Telegram
+        ((ImageButton)view.findViewById(R.id.telegram)).setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View view) {
+                sendTelegram(); // Launch Telegram
+            }
+        });
+    }
+    //-----------------------------------------------------------------------------------------------------------------------
+    private void makeCall() {
+        // Request a permission to make a call
+        if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(VolunteerMainActivity.this, new
+                    String[]{android.Manifest.permission.CALL_PHONE}, 0);
+        } else {
+            // Make a call
+            startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + userPhoneStr)));
+        }
+    }
+    //-----------------------------------------------------------------------------------------------------------------------
+    private void sendWhatsapp() {
+        String url = "https://api.whatsapp.com/send?phone="+userPhoneStr;
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    }
+    //-----------------------------------------------------------------------------------------------------------------------
+    private void sendTelegram() {
+//        Intent telegram = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/iman_augustine"));
+//        startActivity(telegram);
+        Intent LaunchIntent=getPackageManager().getLaunchIntentForPackage("org.telegram.messenger");
+        startActivity(LaunchIntent);
     }
     //-----------------------------------------------------------------------------------------------------------------------
     // Log out
@@ -282,7 +328,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                     Log.d("AccountSetupActivity", "onDataChange: error: "+error.getLocalizedMessage());
                 }
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Cancelled
@@ -311,7 +356,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                     Log.d("AccountSetupActivity", "onDataChange: error: "+error.getLocalizedMessage());
                 }
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Cancelled

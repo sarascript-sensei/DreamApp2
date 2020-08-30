@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
   <group android:checkableBehavior="single">
-     <item
+    <item
         android:id="@+id/history"
-         android:title="История"
-         android:checkable="false"></item>
+        android:icon="@drawable/ic_outline_history_24"
+        android:title="История"
+        android:checkable="false" />
     <item
         android:id="@+id/chat"
+        android:icon="@drawable/ic_outline_chat_24"
         android:title="Чат"
-        android:checkable="false"></item>
+        android:checkable="false" />
     <item
         android:id="@+id/change_profile"
+        android:icon="@drawable/ic_outline_account_box_24"
         android:title="Изменить профиль"
-        android:checkable="false"></item>
+        android:checkable="false" />
     <item
         android:id="@+id/logout"
+        android:icon="@drawable/ic_exit"
         android:title="Выйти"
-        android:checkable="false"></item>
+        android:checkable="false" />
   </group>
 </menu>

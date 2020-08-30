@@ -131,10 +131,10 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.thank: // User is thankful for the volunteer
+            case R.id.thumbUp: // User is thankful for the volunteer
                 Toast.makeText(this, "Thank you!", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.clear: // Did not help or did it badly
+            case R.id.thumbDown: // Did not help or did it badly
                 Toast.makeText(this, "I am not very thankful!", Toast.LENGTH_SHORT).show();
                 break;
             case android.R.id.home: // On home arrow pressed
