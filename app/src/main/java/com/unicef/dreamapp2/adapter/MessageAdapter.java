@@ -49,6 +49,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return new MessageViewHolder(itemView);
     }
 
+    // On bind view holder
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         holder.messageText1.setText(("Иман Уулу:\n"+messageList.get(position)));
@@ -62,10 +63,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
-        //
+        // Global variables
         private TextView messageText1;
         private TextView messageText2;
 
+        // Message view holder
         private MessageViewHolder(View view) {
             super(view);
             // Views initialize

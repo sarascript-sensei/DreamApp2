@@ -247,11 +247,11 @@ public class ChatActivity extends AppCompatActivity {
     // Connect chatters to the channel
     private void bindToChannel() {
         // Binding customer to the volunteer
-        customerDatabase.child(customerID).child(Utility.MESSAGES).child(Utility.CHAT_ID)
-                .setValue(volunteerID);
+        customerDatabase.child(customerID).child(Utility.MESSAGES).child(chatID)
+                .child(Utility.CHATTER_ID).setValue(volunteerID);
         // Binding volunteer to the customer
-        volunteerDatabase.child(volunteerID).child(Utility.MESSAGES).child(Utility.CHAT_ID)
-                .setValue(customerID);
+        volunteerDatabase.child(volunteerID).child(Utility.MESSAGES).child(chatID)
+                .child(Utility.CHATTER_ID).setValue(customerID);
     }
 
     // Extract array list from the map returned on data change in Firebase
