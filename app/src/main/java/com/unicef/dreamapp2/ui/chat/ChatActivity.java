@@ -101,8 +101,10 @@ public class ChatActivity extends AppCompatActivity {
         try {
             // Firebase Messages database
             messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
-            customerDatabase = FirebaseDatabase.getInstance().getReference().child(MyPreferenceManager.REGULAR_USER); // Regular users database
-            volunteerDatabase = FirebaseDatabase.getInstance().getReference().child(MyPreferenceManager.VOLUNTEER); // Volunteers database
+            customerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
+                    .child(MyPreferenceManager.REGULAR_USER); // Regular users database
+            volunteerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
+                    .child(MyPreferenceManager.VOLUNTEER); // Volunteers database
             // Shared preferences
             shared = MyPreferenceManager.getMySharedPreferences(this);
             // User type
@@ -141,10 +143,10 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.thumbUp: // User is thankful for the volunteer
-                Toast.makeText(this, "Thank you!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Liked!", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.thumbDown: // Did not help or did it badly
-                Toast.makeText(this, "I am not very thankful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Disliked!", Toast.LENGTH_SHORT).show();
                 break;
             case android.R.id.home: // On home arrow pressed
                 finish();
@@ -235,10 +237,21 @@ public class ChatActivity extends AppCompatActivity {
             chatModel.message = message; // Message body
             messageRef.child(chatID).child(key).setValue(chatModel); // "Sending" the actual message
             messageEdit.setText(null); // Resetting mesage text field
+            bindToChannel(); // Binds chat members to the one channel
         } else {
             // Prompt the user to enter message
             Toast.makeText(this, "Введите сообщение!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Connect chatters to the channel
+    private void bindToChannel() {
+        // Binding customer to the volunteer
+        customerDatabase.child(customerID).child(Utility.MESSAGES).child(Utility.CHAT_ID)
+                .setValue(volunteerID);
+        // Binding volunteer to the customer
+        volunteerDatabase.child(volunteerID).child(Utility.MESSAGES).child(Utility.CHAT_ID)
+                .setValue(customerID);
     }
 
     // Extract array list from the map returned on data change in Firebase

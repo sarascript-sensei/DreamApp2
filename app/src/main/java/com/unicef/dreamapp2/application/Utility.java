@@ -6,9 +6,19 @@ import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
+/**
+ * @author Iman Augustine
+ *
+ * Utility.
+ *
+ * */
+
 public class Utility {
 
+    // Static global variables
     public static final String MESSAGES = "Messages";
+    public static final String CHAT_ID = "chatId";
+    public static final String USERS = "Users";
 
     // Convert bitmap to base64
     public static String getBase64FromBitmap(Bitmap bitmap) {

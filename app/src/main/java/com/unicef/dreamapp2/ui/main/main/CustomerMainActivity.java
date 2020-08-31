@@ -188,7 +188,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
         // Firebase databases
         mUserInfoDatabase = FirebaseDatabase.getInstance().getReference()
-                .child("Users")
+                .child(Utility.USERS)
                 .child(mUserType)
                 .child(userID);
 
