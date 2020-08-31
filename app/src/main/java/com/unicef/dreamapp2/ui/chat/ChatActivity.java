@@ -25,7 +25,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.adapter.MessageAdapter;
-import com.unicef.dreamapp2.application.MyApplication;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.model.ChatModel;

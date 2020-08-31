@@ -29,6 +29,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="n">
+        <service
+            android:name=".service.LocalFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
         <activity android:name=".ui.chat.ChatListActivity"></activity>
         <!--
           The API key for Google Maps-based APIs is defined as a string resource.

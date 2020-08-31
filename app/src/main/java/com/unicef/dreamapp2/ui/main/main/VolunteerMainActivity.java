@@ -70,6 +70,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * @author Iman Augustine
  *
  * VolunteerMainActivity extends FragmentActivity.
+ *
  * */
 
 public class VolunteerMainActivity extends FragmentActivity implements OnMapReadyCallback {

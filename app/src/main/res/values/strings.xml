@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DreamApp</string>
+    <string name="app_name">Карта Желаний</string>
     <string name="title_activity_maps">Map</string>
     <string name="app_in_name">Карта</string>
     <string name="app_in_after">Жеаний</string>
