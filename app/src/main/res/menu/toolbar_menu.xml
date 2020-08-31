@@ -6,11 +6,13 @@
         android:title="Dislike"
         android:orderInCategory="79"
         android:icon="@drawable/ic_outline_thumb_down_24"
-        app:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText"
+        android:visible="false"/>
     <item
         android:id="@+id/thumbUp"
         android:title="Like"
         android:orderInCategory="79"
         android:icon="@drawable/ic_outline_thumb_up_24"
-        app:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom|withText"
+        android:visible="false"/>
 </menu>

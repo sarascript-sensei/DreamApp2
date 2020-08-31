@@ -160,6 +160,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         initView();
         // Shared preferences
         shared = MyPreferenceManager.getMySharedPreferences(this);
+        // User type
         mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
         // Firebase realtime database
         mAuth = FirebaseAuth.getInstance();

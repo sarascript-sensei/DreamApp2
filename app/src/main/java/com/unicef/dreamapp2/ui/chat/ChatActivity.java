@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.adapter.MessageAdapter;
 import com.unicef.dreamapp2.application.MyApplication;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.model.ChatModel;
 
@@ -65,6 +67,7 @@ public class ChatActivity extends AppCompatActivity {
     private String customerID = null;
     private String volunteerID = null;
     private String chatterName = null;
+    private String mUserType = null;
     private String chatID = null;
     private String key = null;
 
@@ -81,49 +84,67 @@ public class ChatActivity extends AppCompatActivity {
     // Chat model
     private ChatModel chatModel;
 
+    // Menu item
+    private MenuItem like;
+    private MenuItem dislike;
+
+    // Shared preferences
+    private SharedPreferences shared;
+
     // On creation of activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Accessing customer and volunteer id's
-        customerID = getIntent().getStringExtra("customerID"); // Customer ID
-        volunteerID = getIntent().getStringExtra("volunteerID"); // Volunteer ID
-        chatterName = getIntent().getStringExtra("chatterName"); // Chatter name
-        chatID = customerID + "_" + volunteerID; // Conjured up chat id
+        try {
+            // Accessing customer and volunteer id's
+            customerID = getIntent().getStringExtra("customerID"); // Customer ID
+            volunteerID = getIntent().getStringExtra("volunteerID"); // Volunteer ID
+            chatterName = getIntent().getStringExtra("chatterName"); // Chatter name
+            chatID = customerID + "_" + volunteerID; // Conjured up chat id
 
-        // Setting correspondent's name as toolbar title and enabling home button
-        getSupportActionBar().setTitle(chatterName);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            // Shared preferences
+            shared = MyPreferenceManager.getMySharedPreferences(this);
 
-        // Firebase database
-        messageRef = FirebaseDatabase.getInstance().getReference()
-                .child(Utility.MESSAGES); // Messages database
-                // Chat id [customerID + volunteerID]
+            // User type
+            mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
 
-        // Initializes views
-        initView();
+            // Setting correspondent's name as toolbar title and enabling home button
+            getSupportActionBar().setTitle(chatterName);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Adapter
-        layoutManager = new LinearLayoutManager(this); // Linear layout manager
-        messageAdapter = new MessageAdapter(new ArrayList<String>(), MyApplication.getInstance()); // Messages adapter
-        messageList.setLayoutManager(layoutManager); // Setting layout manager
-        messageList.setAdapter(messageAdapter); // Setting messages adapter
+            // Firebase database
+            messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
+            // Chat id [customerID + volunteerID]
 
-        // Creating chat model
-        chatModel = new ChatModel();
-        chatModel.senderId = FirebaseAuth.getInstance().getUid(); // The sender's uid
-        chatModel.messageType = MESSAGE_TYPE; // Message type should be TEXT
+            // Initializes views
+            initView();
 
-        // Sets up listeners
-        setUpListeners();
+            // Adapter
+            layoutManager = new LinearLayoutManager(this); // Linear layout manager
+            messageAdapter = new MessageAdapter(new ArrayList<String>(), MyApplication.getInstance()); // Messages adapter
+            messageList.setLayoutManager(layoutManager); // Setting layout manager
+            messageList.setAdapter(messageAdapter); // Setting messages adapter
+
+            // Creating chat model
+            chatModel = new ChatModel();
+            chatModel.senderId = FirebaseAuth.getInstance().getUid(); // The sender's uid
+            chatModel.messageType = MESSAGE_TYPE; // Message type should be TEXT
+
+            // Sets up listeners
+            setUpListeners();
+        } catch(NullPointerException error) {
+            Log.d(TAG, "onCreate: error: "+error);
+        }
     }
 
     // Toolbar menu inflated
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu); // Inflating menu
+        this.like = menu.findItem(R.id.thumbUp); // Accessing Like menu item
+        this.dislike = menu.findItem(R.id.thumbDown); // Accessing Dislike menu item
         return true;
     }
 
@@ -147,10 +168,15 @@ public class ChatActivity extends AppCompatActivity {
     private void initView() {
         sendBtn = findViewById(R.id.sendMessage); // Send button
         messageEdit = findViewById(R.id.messageEdit); // Message text edit
-        messageEdit.requestFocus();
+        messageEdit.requestFocus(); // Requesting focus on edit text
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         messageList = findViewById(R.id.messageList); // RecyclerView
+        // Deciding visibility of menu items
+        if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
+            this.like.setVisible(true); // Making visible
+            this.dislike.setVisible(true); // Making visible
+        }
     }
 
     // Sets up listeners on widgets
