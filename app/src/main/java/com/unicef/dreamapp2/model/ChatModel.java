@@ -33,6 +33,13 @@ public class ChatModel {
     public ChatModel(){
     }
 
+    public ChatModel(String senderId, String messageType){
+        this.senderId = senderId; // Sender id
+        this.messageType = messageType; // Message type
+    }
+
+
+
     public Map<String, String> getTimestamp() { return ServerValue.TIMESTAMP; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 

@@ -64,12 +64,13 @@ public class ChatActivity extends AppCompatActivity {
 
     // String
     public static final String MESSAGE_TYPE = "TEXT";
-    private String customerID = null;
-    private String volunteerID = null;
-    private String chatterName = null;
-    private String mUserType = null;
-    private String chatID = null;
-    private String key = null;
+    private String customerID = null; // Customer ID
+    private String volunteerID = null; // Volunteer ID
+    private String chatterName = null; // Chatter name
+    private String mUserType = null; // User role
+    private String chatID = null; // Chat ID
+    private String key = null; // Key
+    private String userId = null; // User id
 
     // RecyclerView
     private RecyclerView messageList;
@@ -98,42 +99,29 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         try {
-            // Accessing customer and volunteer id's
-            customerID = getIntent().getStringExtra("customerID"); // Customer ID
-            volunteerID = getIntent().getStringExtra("volunteerID"); // Volunteer ID
-            chatterName = getIntent().getStringExtra("chatterName"); // Chatter name
-            chatID = customerID + "_" + volunteerID; // Conjured up chat id
-
+            // Firebase Messages database
+            messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
+            customerDatabase = FirebaseDatabase.getInstance().getReference().child(MyPreferenceManager.REGULAR_USER); // Regular users database
+            volunteerDatabase = FirebaseDatabase.getInstance().getReference().child(MyPreferenceManager.VOLUNTEER); // Volunteers database
             // Shared preferences
             shared = MyPreferenceManager.getMySharedPreferences(this);
-
             // User type
             mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
-
+            // Current user ID
+            userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
             // Setting correspondent's name as toolbar title and enabling home button
-            getSupportActionBar().setTitle(chatterName);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-            // Firebase database
-            messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
-            // Chat id [customerID + volunteerID]
-
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+            // Creating chat model with sender id and message type
+            chatModel = new ChatModel(userId, MESSAGE_TYPE);
+            // Creating channel
+            setupChannel();
             // Initializes views
             initView();
-
-            // Adapter
-            layoutManager = new LinearLayoutManager(this); // Linear layout manager
-            messageAdapter = new MessageAdapter(new ArrayList<String>(), MyApplication.getInstance()); // Messages adapter
-            messageList.setLayoutManager(layoutManager); // Setting layout manager
-            messageList.setAdapter(messageAdapter); // Setting messages adapter
-
-            // Creating chat model
-            chatModel = new ChatModel();
-            chatModel.senderId = FirebaseAuth.getInstance().getUid(); // The sender's uid
-            chatModel.messageType = MESSAGE_TYPE; // Message type should be TEXT
-
             // Sets up listeners
             setUpListeners();
+            // Load messages
+            loadMessages();
+
         } catch(NullPointerException error) {
             Log.d(TAG, "onCreate: error: "+error);
         }
@@ -172,6 +160,11 @@ public class ChatActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         messageList = findViewById(R.id.messageList); // RecyclerView
+        // Setting adapter
+        layoutManager = new LinearLayoutManager(this); // Linear layout manager
+        messageAdapter = new MessageAdapter(new ArrayList<String>(), this); // Messages adapter
+        messageList.setLayoutManager(layoutManager); // Setting layout manager
+        messageList.setAdapter(messageAdapter); // Setting messages adapter
         // Deciding visibility of menu items
         if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
             this.like.setVisible(true); // Making visible
@@ -179,17 +172,8 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    // Sets up listeners on widgets
-    private void setUpListeners() {
-        // Setting on click listener
-        sendBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Get the entered text and insert into the database
-                sendMessage(messageEdit.getText().toString());
-            }
-        });
-
+    // Load messages
+    private void loadMessages() {
         // Listens to value changes etc inside Messages database
         messageRef.addValueEventListener(new ValueEventListener() {
             // On data change
@@ -207,7 +191,6 @@ public class ChatActivity extends AppCompatActivity {
                     Log.d(TAG, "onDataChange: completely no conversations. Not a problem, we are the first users of the app.");
                 }
             }
-
             // On cancellation
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -215,6 +198,32 @@ public class ChatActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    // Sets up listeners on widgets
+    private void setUpListeners() {
+        // Setting on click listener
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Get the entered text and insert into the database
+                sendMessage(messageEdit.getText().toString());
+            }
+        });
+    }
+
+    // Create channel
+    private void setupChannel() {
+        // Accessing customer and volunteer id's
+        customerID = getIntent().getStringExtra("customerID"); // Customer ID
+        volunteerID = getIntent().getStringExtra("volunteerID"); // Volunteer ID
+        chatterName = getIntent().getStringExtra("chatterName"); // Chatter name
+        chatID = getIntent().getStringExtra("chatID"); // Existing chat channel
+        Objects.requireNonNull(getSupportActionBar()).setTitle(chatterName); // Setting chatter name
+        // This is the first time a volunteer has text to the person who needs help
+        if (chatID == null) {
+            chatID = volunteerID + customerID; // Generating chat id by concatenating user id's
+        }
     }
 
     // Sends message
@@ -234,22 +243,20 @@ public class ChatActivity extends AppCompatActivity {
 
     // Extract array list from the map returned on data change in Firebase
     private ArrayList<String> extractMessageList(DataSnapshot snapshot) {
-        ArrayList<String> messagesList = new ArrayList<>();
+        ArrayList<String> messagesList = new ArrayList<>(); // List of messages that will be returned
         HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
-        HashMap<String, Object> chatMap = (HashMap<String, Object>) map.get(chatID);
+        HashMap<String, Object> chatMap = (HashMap<String, Object>) map.get(chatID); // Messages
         if(chatMap!=null) {
-            HashMap<String, Object> messages;
+            HashMap<String, Object> messages; // Messages map
             Object[] keySet = chatMap.keySet().toArray();
-
-            StringBuilder message = new StringBuilder();
+            // Loops through messages HashMap
             for (int i = 0; i < keySet.length; i++) {
+                // Getting message map by key
                 messages = (HashMap<String, Object>) chatMap.get(keySet[i].toString());
-                // message.append(messages.get("message").toString()).append("\n");
-                messagesList.add(messages.get("message").toString());
+                messagesList.add(messages.get("message").toString()); // Adding into the list
             }
-            // Log.d(TAG, "extractArrayList: " + messagesList.toString());
         }
-        return messagesList;
+        return messagesList; // Return
     }
 
     // On pause
