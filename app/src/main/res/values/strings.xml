@@ -4,7 +4,7 @@
     <string name="app_in_name">Карта</string>
     <string name="app_in_after">Жеаний</string>
     <string name="bottom_1">Войти</string>
-    <string name="bottom_2">Зарегистрироваться</string>
+    <string name="bottom_2">Зарегестрироваться</string>
     <string name="StatusVolunteer">Вход для волонтёров</string>
     <string name="TextView3">Еще нет аккаунта?</string>
     <string name="title_activity_volunteer_map">Map</string>
