@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/help1"
     tools:context=".ui.chat.ChatListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/chat_list"
+        android:id="@+id/channelsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/channel_item"
@@ -15,5 +16,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

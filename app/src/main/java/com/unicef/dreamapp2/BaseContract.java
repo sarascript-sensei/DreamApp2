@@ -6,8 +6,8 @@ package com.unicef.dreamapp2;
  *
  * */
 
-public interface BaseContract {
-    interface SomeContract {
-
+public class BaseContract {
+    interface OnItemClickListener {
+        public <T> onItemClick(T listItem);
     }
 }

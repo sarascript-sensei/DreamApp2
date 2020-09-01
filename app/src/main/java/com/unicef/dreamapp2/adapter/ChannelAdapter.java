@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.model.ChannelModel;
 
 import java.util.List;
 
@@ -23,20 +24,23 @@ import java.util.List;
 
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageViewHolder> {
 
-    private List<String> messageList;
+    // Global variables
+    private List<ChannelModel> channelsList;
     private Context context;
 
-    public ChannelAdapter(List<String> messageList, Context context) {
-        this.messageList = messageList;
+    // Adapter constructor
+    public ChannelAdapter(List<ChannelModel> channelsList, Context context) {
+        this.channelsList = channelsList;
         this.context = context;
     }
 
-    public void setValues(List<String> messageList) {
-         this.messageList.clear();
-         if(messageList!=null) {
-             this.messageList.addAll(messageList);
+    // Sets values
+    public void setValues(List<ChannelModel > messageList) {
+         this.channelsList.clear();
+         if(messageList!=null) { // If the list is not empty
+             this.channelsList.addAll(messageList);
          }
-         this.notifyDataSetChanged();
+         this.notifyDataSetChanged(); // Notify data set change
     }
 
     @NonNull
@@ -51,13 +55,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
     // On bind view holder
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-      //  holder.name.setText(("Иман Уулу:\n"+messageList.get(position)));
-      //  holder.lastMessage.setText(("Вы:\n"+messageList.get(position)));
+        holder.name.setText((channelsList.get(position).getChatterName()));
+        // holder.lastMessage.setText(("Вы:\n"+messageList.get(position)));
     }
 
     @Override
     public int getItemCount() {
-        return messageList != null ? messageList.size() : 0;
+        return channelsList != null ? channelsList.size() : 0;
     }
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
@@ -72,7 +76,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
             // Views initialize
             name = view.findViewById(R.id.name);
             lastMessage = view.findViewById(R.id.lastMessage);
-
         }
     }
 }
