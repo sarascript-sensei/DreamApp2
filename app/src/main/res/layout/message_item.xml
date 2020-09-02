@@ -19,7 +19,7 @@
         android:textColor="@color/white"
         android:textSize="16dp"
         android:text="Iman Uulu:\nВы можете мне почочь?"
-        android:visibility = "invisible"/>
+        android:visibility = "gone"/>
 
     <TextView
         android:id="@+id/messageText2"
@@ -34,6 +34,7 @@
         android:textColor="@color/white"
         android:textSize="16dp"
         android:text="Вы:\nProgramming is really awesome right now and I gotta the best coder in the world and I am the best coder right now."
+        android:visibility="gone"
       />
 
 </RelativeLayout>

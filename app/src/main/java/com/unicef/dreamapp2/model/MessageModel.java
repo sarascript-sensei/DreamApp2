@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * */
 
-public class ChatModel {
+public class MessageModel {
     // Global variables
     public String chatId = ""; // Chat id
     public String messageId; // Message id
@@ -30,15 +30,13 @@ public class ChatModel {
     @Exclude
     public long blockTime = 0;
 
-    public ChatModel(){
+    public MessageModel(){
     }
 
-    public ChatModel(String senderId, String messageType){
+    public MessageModel(String senderId, String messageType){
         this.senderId = senderId; // Sender id
         this.messageType = messageType; // Message type
     }
-
-
 
     public Map<String, String> getTimestamp() { return ServerValue.TIMESTAMP; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }

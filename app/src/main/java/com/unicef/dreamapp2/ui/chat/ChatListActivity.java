@@ -160,12 +160,15 @@ public class ChatListActivity extends AppCompatActivity {
     private ChannelModel createChannel(HashMap<String, Object> channel) {
         ChannelModel channelModel = new ChannelModel(); // Create channel model
         // Chatter name
-        channelModel.setChatterName(Objects.requireNonNull(channel.get("chatterName")).toString());
-        if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
+        channelModel.setChatterName(Objects.requireNonNull(channel.get(Utility.CHATTER_NAME)).toString());
+        channelModel.setCustomerName(channel.get(Utility.CUSTOMER_NAME).toString());
+        channelModel.setVolunteerName(channel.get(Utility.VOLUNTEER_NAME).toString());
+
+        if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) { // This is the user's chat, not a volunteer
             channelModel.setCustomerId(userId); // Customer id
-            channelModel.setVolunteerId(channel.get("chatterId").toString()); // Chatter's id
+            channelModel.setVolunteerId(channel.get(Utility.CHATTER_ID).toString()); // Chatter's id
         } else {
-            channelModel.setCustomerId(channel.get("chatterId").toString()); // Chatter's id
+            channelModel.setCustomerId(channel.get(Utility.CHATTER_ID).toString()); // Chatter's id
             channelModel.setVolunteerId(userId); // Volunteer id
         }
         return channelModel; // return
@@ -174,7 +177,9 @@ public class ChatListActivity extends AppCompatActivity {
     // Start chat with the chosen customer
     private void startChatActivity(ChannelModel channel) {
         Intent intent = new Intent(ChatListActivity.this, ChatActivity.class);
-        intent.putExtra("chatterName", channel.getCustomerName()); // Customer name
+        intent.putExtra("chatterName", channel.getCustomerName()); // Chatter name
+        intent.putExtra("customerName", channel.getCustomerName()); // Customer name
+        intent.putExtra("volunteerName", channel.getVolunteerName()); // Volunteer name
         intent.putExtra("customerId", channel.getCustomerId()); // Set customer id
         intent.putExtra("volunteerId", channel.getVolunteerId()); // Set volunteer id
         startActivity(intent);

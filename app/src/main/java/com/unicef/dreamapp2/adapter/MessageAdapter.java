@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.model.MessageModel;
 
 import java.util.List;
 
@@ -24,15 +25,19 @@ import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    private List<String> messageList;
+    private List<MessageModel> messageList;
+    private String userId;
+    private String chatterName;
     private Context context;
 
-    public MessageAdapter(List<String> messageList, Context context) {
-        this.messageList = messageList;
-        this.context = context;
+    public MessageAdapter(List<MessageModel> messageList, String userId, String chatterName, Context context) {
+        this.messageList = messageList; // Message list
+        this.userId = userId; // Current user's id
+        this.chatterName = chatterName; // Other sender's name
+        this.context = context; // Context
     }
 
-    public void setValues(List<String> messageList) {
+    public void setValues(List<MessageModel> messageList) {
          this.messageList.clear();
          if(messageList!=null) {
              this.messageList.addAll(messageList);
@@ -52,8 +57,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     // On bind view holder
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.messageText1.setText(("Иман Уулу:\n"+messageList.get(position)));
-        holder.messageText2.setText(("Вы:\n"+messageList.get(position)));
+
+        // Message model item
+        MessageModel message = messageList.get(position);
+
+        // The current user's own message
+        if (message.senderId.equals(userId)) {
+            holder.messageText2.setVisibility(View.VISIBLE); // Showing message
+            holder.messageText2.setText(("Вы:\n" + message.message)); // Setting message text
+        } else { // The other chatter's message
+            holder.messageText1.setVisibility(View.VISIBLE); // Showing message
+            holder.messageText1.setText((chatterName + ":\n" + message.message)); // Setting message text
+        }
     }
 
     @Override

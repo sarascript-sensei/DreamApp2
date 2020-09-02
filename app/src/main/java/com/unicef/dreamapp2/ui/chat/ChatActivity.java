@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +28,7 @@ import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.adapter.MessageAdapter;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
-import com.unicef.dreamapp2.model.ChatModel;
+import com.unicef.dreamapp2.model.MessageModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +78,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText messageEdit;
 
     // Chat model
-    private ChatModel chatModel;
+    private MessageModel chatModel;
 
     // Menu item
     private MenuItem like;
@@ -164,7 +165,7 @@ public class ChatActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         // Creating chat model with sender id and message type
-        chatModel = new ChatModel(userId, MESSAGE_TYPE);
+        chatModel = new MessageModel(userId, MESSAGE_TYPE);
     }
 
     // Initializes views
@@ -177,7 +178,7 @@ public class ChatActivity extends AppCompatActivity {
         messageList = findViewById(R.id.messageList); // RecyclerView
         // Setting adapter
         layoutManager = new LinearLayoutManager(this); // Linear layout manager
-        messageAdapter = new MessageAdapter(new ArrayList<String>(), this); // Messages adapter
+        messageAdapter = new MessageAdapter(new ArrayList<MessageModel>(),userId, chatterName, this); // Messages adapter
         messageList.setLayoutManager(layoutManager); // Setting layout manager
         messageList.setAdapter(messageAdapter); // Setting messages adapter
         // Deciding visibility of menu items
@@ -196,7 +197,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // If there is any data
                 if(snapshot.exists() && snapshot.getChildrenCount()>0) {
-                    ArrayList<String> messages = extractMessageList(snapshot); // Extracts messages list
+                    ArrayList<MessageModel> messages = extractMessageList(snapshot); // Extracts messages list
                     if(messages.size()>0) { // If there is at least one message
                         messageAdapter.setValues(messages); // Sets adapter's value to the messages list
                         layoutManager.smoothScrollToPosition(messageList, null, messages.size() - 1); // Scrolls down to the last message
@@ -261,27 +262,41 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference messagesCustomer = customerDatabase.child(customerId).child(Utility.MESSAGES).child(chatID);
         messagesCustomer.child(Utility.CHATTER_ID).setValue(volunteerId); // Chatter id
         messagesCustomer.child(Utility.CHATTER_NAME).setValue(volunteerName); // Volunteer name
+        messagesCustomer.child(Utility.CUSTOMER_NAME).setValue(customerName); // Customer name
+        messagesCustomer.child(Utility.VOLUNTEER_NAME).setValue(volunteerName); // Volunteer name
+
         // Binding volunteer to the customer
         DatabaseReference messageVolunteer = volunteerDatabase.child(volunteerId).child(Utility.MESSAGES).child(chatID);
         messageVolunteer.child(Utility.CHATTER_ID).setValue(customerId); // Customer id
-        messageVolunteer.child(Utility.CHATTER_NAME).setValue(customerName); // Customer name
+        messageVolunteer.child(Utility.CHATTER_NAME).setValue(customerName); // Chatter name
+        messageVolunteer.child(Utility.CUSTOMER_NAME).setValue(customerName); // Customer name
+        messageVolunteer.child(Utility.VOLUNTEER_NAME).setValue(volunteerName); // Volunteer name
     }
 
     // Extract array list from the map returned on data change in Firebase
-    private ArrayList<String> extractMessageList(DataSnapshot snapshot) {
-        ArrayList<String> messagesList = new ArrayList<>(); // List of messages that will be returned
+    private ArrayList<MessageModel> extractMessageList(DataSnapshot snapshot) {
+
+        ArrayList<MessageModel> messagesList = new ArrayList<>(); // List of messages that will be returned
         HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
         HashMap<String, Object> chatMap = (HashMap<String, Object>) map.get(chatID); // Messages
-        if(chatMap!=null) {
+        MessageModel message;
+
+        if(chatMap!=null)
+        {
             HashMap<String, Object> messages; // Messages map
-            Object[] keySet = chatMap.keySet().toArray();
+            Object[] keySet = chatMap.keySet().toArray(); // Key set
+
             // Loops through messages HashMap
-            for (int i = 0; i < keySet.length; i++) {
+            for (Object o : keySet) {
                 // Getting message map by key
-                messages = (HashMap<String, Object>) chatMap.get(keySet[i].toString());
-                messagesList.add(messages.get("message").toString()); // Adding into the list
+                messages = (HashMap<String, Object>) chatMap.get(o.toString());
+                message = new MessageModel(); // Newly created message
+                message.senderId = messages.get("senderId").toString(); // Sender id
+                message.message = messages.get("message").toString(); // Message body
+                messagesList.add(message); // Adding into the list
             }
         }
+
         return messagesList; // Return
     }
 
