@@ -18,6 +18,7 @@ public class Utility {
     // Static global variables
     public static final String MESSAGES = "Messages";
     public static final String CHATTER_ID = "chatterId";
+    public static final String CHATTER_NAME = "chatterName";
     public static final String USERS = "Users";
 
     // Convert bitmap to base64

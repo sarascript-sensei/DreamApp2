@@ -74,7 +74,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
         private MessageViewHolder(View view) {
             super(view);
             // Views initialize
-            name = view.findViewById(R.id.name);
+            name = view.findViewById(R.id.chatterName);
             lastMessage = view.findViewById(R.id.lastMessage);
         }
     }

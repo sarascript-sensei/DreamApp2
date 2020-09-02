@@ -14,8 +14,12 @@ import java.util.Map;
 
 public class ChannelModel {
     // Global variables
-    public String chatterName = ""; // Chat id
-    public String lastMessage; // Message id
+    public String chatterName = null; // Chat name
+    public String lastMessage = null; // Message id
+    public String customerId = null; // Customer id
+    public String volunteerId = null; // Volunteer id
+    public String customerName = null; // Customer id
+    public String volunteerName = null; // Volunteer id
 
     @Exclude
     public String localMediaUrl = "";
@@ -26,7 +30,12 @@ public class ChannelModel {
     @Exclude
     public long blockTime = 0;
 
-    public ChannelModel(){
+    // Constructor
+    public ChannelModel(){ }
+
+    public ChannelModel(String name, String lastMessage){
+        this.chatterName = name;
+        this.lastMessage = lastMessage;
     }
 
     public String getChatterName() {
@@ -43,5 +52,37 @@ public class ChannelModel {
 
     public void setLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setVolunteerId(String volunteerId) {
+        this.volunteerId = volunteerId;
+    }
+
+    public String getVolunteerId() {
+        return volunteerId;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setVolunteerName(String volunteerName) {
+        this.volunteerName = volunteerName;
+    }
+
+    public String getVolunteerName() {
+        return volunteerName;
     }
 }

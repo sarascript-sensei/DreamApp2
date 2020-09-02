@@ -29,16 +29,9 @@ import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.model.ChatModel;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * @author Iman Augustine
@@ -63,9 +56,11 @@ public class ChatActivity extends AppCompatActivity {
 
     // String
     public static final String MESSAGE_TYPE = "TEXT";
-    private String customerID = null; // Customer ID
-    private String volunteerID = null; // Volunteer ID
-    private String chatterName = null; // Chatter name
+    private String chatterName = null; // Chatter name [could be either Customer or Volunteer]
+    private String customerId = null; // Customer ID
+    private String volunteerId = null; // Volunteer ID
+    private String customerName = null; // Customer name
+    private String volunteerName = null; // Volunteer name
     private String mUserType = null; // User role
     private String chatID = null; // Chat ID
     private String key = null; // Key
@@ -98,28 +93,18 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         try {
-            // Firebase Messages database
-            messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
-            customerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
-                    .child(MyPreferenceManager.REGULAR_USER); // Regular users database
-            volunteerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
-                    .child(MyPreferenceManager.VOLUNTEER); // Volunteers database
-            // Shared preferences
-            shared = MyPreferenceManager.getMySharedPreferences(this);
-            // User type
-            mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
-            // Current user ID
-            userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-            // Setting correspondent's name as toolbar title and enabling home button
-            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-            // Creating chat model with sender id and message type
-            chatModel = new ChatModel(userId, MESSAGE_TYPE);
+            // Initializing variables
+            initValues();
+
             // Creating channel
             setupChannel();
+
             // Initializes views
             initView();
+
             // Sets up listeners
             setUpListeners();
+
             // Load messages
             loadMessages();
 
@@ -151,6 +136,35 @@ public class ChatActivity extends AppCompatActivity {
                 finish();
         }
         return true;
+    }
+
+    // Initialize variable values
+    private void initValues() {
+        // Firebase Messages database
+        messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
+
+        // Regular users database
+        customerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
+                .child(MyPreferenceManager.REGULAR_USER);
+
+        // Volunteer users database
+        volunteerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
+                .child(MyPreferenceManager.VOLUNTEER);
+
+        // Shared preferences
+        shared = MyPreferenceManager.getMySharedPreferences(this);
+
+        // User type
+        mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
+
+        // Current user ID
+        userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+
+        // Setting correspondent's name as toolbar title and enabling home button
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        // Creating chat model with sender id and message type
+        chatModel = new ChatModel(userId, MESSAGE_TYPE);
     }
 
     // Initializes views
@@ -215,16 +229,14 @@ public class ChatActivity extends AppCompatActivity {
 
     // Create channel
     private void setupChannel() {
-        // Accessing customer and volunteer id's
-        customerID = getIntent().getStringExtra("customerID"); // Customer ID
-        volunteerID = getIntent().getStringExtra("volunteerID"); // Volunteer ID
         chatterName = getIntent().getStringExtra("chatterName"); // Chatter name
-        chatID = getIntent().getStringExtra("chatID"); // Existing chat channel
+        customerId = getIntent().getStringExtra("customerId"); // Customer ID
+        volunteerId = getIntent().getStringExtra("volunteerId"); // Volunteer ID
+        customerName = getIntent().getStringExtra("customerName"); // Chatter name
+        volunteerName = getIntent().getStringExtra("volunteerName"); // Volunteer name
         Objects.requireNonNull(getSupportActionBar()).setTitle(chatterName); // Setting chatter name
         // This is the first time a volunteer has text to the person who needs help
-        if (chatID == null) {
-            chatID = volunteerID + customerID; // Generating chat id by concatenating user id's
-        }
+        chatID = volunteerId + customerId; // Generating chat id by concatenating user id's
     }
 
     // Sends message
@@ -246,11 +258,13 @@ public class ChatActivity extends AppCompatActivity {
     // Connect chatters to the channel
     private void bindToChannel() {
         // Binding customer to the volunteer
-        customerDatabase.child(customerID).child(Utility.MESSAGES).child(chatID)
-                .child(Utility.CHATTER_ID).setValue(volunteerID);
+        DatabaseReference messagesCustomer = customerDatabase.child(customerId).child(Utility.MESSAGES).child(chatID);
+        messagesCustomer.child(Utility.CHATTER_ID).setValue(volunteerId); // Chatter id
+        messagesCustomer.child(Utility.CHATTER_NAME).setValue(volunteerName); // Volunteer name
         // Binding volunteer to the customer
-        volunteerDatabase.child(volunteerID).child(Utility.MESSAGES).child(chatID)
-                .child(Utility.CHATTER_ID).setValue(customerID);
+        DatabaseReference messageVolunteer = volunteerDatabase.child(volunteerId).child(Utility.MESSAGES).child(chatID);
+        messageVolunteer.child(Utility.CHATTER_ID).setValue(customerId); // Customer id
+        messageVolunteer.child(Utility.CHATTER_NAME).setValue(customerName); // Customer name
     }
 
     // Extract array list from the map returned on data change in Firebase

@@ -56,6 +56,7 @@ import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChatActivity;
+import com.unicef.dreamapp2.ui.chat.ChatListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
@@ -86,12 +87,13 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     // Status
     private int status = 0;
     // String variables
-    private String userNameStr = null;
+    private String customerName = null;
+    private String volunteerName = null;
     private String userProblemStr = null;
     private String userPhoneStr = null;
     private String mUserType = null;
-    private String userID = null;
-    private String customerID = null;
+    private String userId = null;
+    private String customerId = null;
     private String imageBase64 = null;
     // Profile image
     private CircleImageView mProfileImage;
@@ -135,7 +137,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                             break;
                             // Chat
                         case R.id.chat:
-                            Toast.makeText(VolunteerMainActivity.this, "Chat!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(VolunteerMainActivity.this, ChatListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Edit profile
@@ -166,12 +168,12 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         // Firebase realtime database
         mAuth = FirebaseAuth.getInstance();
         // User ID
-        userID = mAuth.getCurrentUser().getUid();
+        userId = mAuth.getCurrentUser().getUid();
         // Firebase database, user info database
         mUserInfoDatabase = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
                 .child(mUserType)
-                .child(userID);
+                .child(userId);
         // Firebase database, help requests database
         mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
@@ -226,7 +228,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         // Root view
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null); // Inflates layout_bottom
         // TextView
-        ((TextView)view.findViewById(R.id.nameTextView)).setText(userNameStr); // User name
+        ((TextView)view.findViewById(R.id.nameTextView)).setText(customerName); // User name
         ((TextView)view.findViewById(R.id.problemTextView)).setText(userProblemStr); // User's problem
         ((TextView)view.findViewById(R.id.phoneTextView)).setText(userPhoneStr); // User's phone
         Glide.with(getApplication())
@@ -242,7 +244,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             @Override
             public void onSingleClick(View view) {
                 dialog.hide();
-                startChatActivity(customerID);
+                startChatActivity(customerId);
             }
         });
         // Call on click
@@ -316,7 +318,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                         // User name
                         if (map.get("name") != null) {
-                             userName.setText(map.get("name").toString());
+                             volunteerName = map.get("name").toString();
+                             userName.setText(volunteerName);
                         }
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
@@ -347,7 +350,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                     if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
                         // Map data structure
                         Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-                        userNameStr = map.get("name").toString(); // Getting user name
+                        customerName = map.get("name").toString(); // Getting user name
                         userProblemStr = map.get("problem").toString(); // Getting user's problem
                         userPhoneStr = map.get("phone").toString(); // Getting user's phone
                         imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
@@ -367,9 +370,11 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     // Start chat with the chosen customer
     private void startChatActivity(String uid) {
         Intent intent = new Intent(VolunteerMainActivity.this, ChatActivity.class);
-        intent.putExtra("chatterName", userNameStr);
-        intent.putExtra("customerID", customerID);
-        intent.putExtra("volunteerID", userID);
+        intent.putExtra("chatterName", customerName); // Customer name
+        intent.putExtra("customerName", customerName); // Customer name
+        intent.putExtra("volunteerName", volunteerName); // Volunteer name
+        intent.putExtra("customerId", customerId); // Customer id
+        intent.putExtra("volunteerId", userId); // Volunteer id
         startActivity(intent);
     }
     //-----------------------------------------------------------------------------------------------------------------------
@@ -382,8 +387,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
             @Override
             public boolean onMarkerClick(Marker marker) {
                 // Loads the selected user's information
-                customerID = Objects.requireNonNull(markersMap.get(marker)).toString();
-                loadCustomerInformation(customerID); // Passes customer ID to load profile information
+                customerId = Objects.requireNonNull(markersMap.get(marker)).toString();
+                loadCustomerInformation(customerId); // Passes customer ID to load profile information
                 return true;
             }
         });

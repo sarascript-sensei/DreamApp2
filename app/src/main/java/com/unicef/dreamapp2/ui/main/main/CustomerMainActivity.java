@@ -56,6 +56,7 @@ import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
+import com.unicef.dreamapp2.ui.chat.ChatListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
@@ -145,7 +146,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             break;
                             // Chat
                         case R.id.chat:
-                            Toast.makeText(CustomerMainActivity.this, "Chat!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(CustomerMainActivity.this, ChatListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Change profile
@@ -178,6 +179,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
 
         // Initialized shared preferences
         shared = MyPreferenceManager.getMySharedPreferences(this);
+        // User type
         mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
 
         // Firebase realtime database
@@ -290,9 +292,9 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         mHelpRequestDatabase.child(userID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                mMap.clear();
-                mRequest.setText("мне нужна помощь");
-                isCancellable = false;
+                mMap.clear(); //  Clear the map
+                mRequest.setText("мне нужна помощь"); // Resetting text
+                isCancellable = false; // Select a help type to cancel it again
             }
         });
     }
