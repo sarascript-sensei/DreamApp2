@@ -17,13 +17,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.unicef.dreamapp2.BaseContract;
+import com.unicef.dreamapp2.BaseInterface;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.adapter.ChannelAdapter;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.model.ChannelModel;
-import com.unicef.dreamapp2.ui.main.main.VolunteerMainActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +100,12 @@ public class ChatListActivity extends AppCompatActivity {
     private void initView() {
         // List initializations
         channelsList = findViewById(R.id.channelsList);
-        channelAdapter = new ChannelAdapter(new ArrayList<ChannelModel>(), this);
+        channelAdapter = new ChannelAdapter(new ArrayList<ChannelModel>(), this, new BaseInterface.OnItemClickListener() {
+            @Override
+            public void onItemClick(Object object) {
+                startChatActivity((ChannelModel)object); // Launch chat
+            }
+        });
         channelsList.setLayoutManager(new LinearLayoutManager(this));
         channelsList.setAdapter(channelAdapter);
     }
@@ -151,7 +155,7 @@ public class ChatListActivity extends AppCompatActivity {
                 list.add(createChannel(channel)); // Create and add channel into the list
             }
             // Inflate the list with
-            channelAdapter.setValues(list); // Setting list
+            channelAdapter.setValues(list); // Setting values in the list
             channelAdapter.notifyDataSetChanged(); // Notify data change
         }
     }
@@ -177,7 +181,7 @@ public class ChatListActivity extends AppCompatActivity {
     // Start chat with the chosen customer
     private void startChatActivity(ChannelModel channel) {
         Intent intent = new Intent(ChatListActivity.this, ChatActivity.class);
-        intent.putExtra("chatterName", channel.getCustomerName()); // Chatter name
+        intent.putExtra("chatterName", channel.getChatterName()); // Chatter name
         intent.putExtra("customerName", channel.getCustomerName()); // Customer name
         intent.putExtra("volunteerName", channel.getVolunteerName()); // Volunteer name
         intent.putExtra("customerId", channel.getCustomerId()); // Set customer id
