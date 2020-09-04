@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Message;
+import android.transition.ChangeTransform;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -94,11 +95,11 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         try {
-            // Initializing variables
-            initValues();
-
             // Creating channel
             setupChannel();
+
+            // Initializing variables
+            initValues();
 
             // Initializes views
             initView();
@@ -120,6 +121,12 @@ public class ChatActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu); // Inflating menu
         this.like = menu.findItem(R.id.thumbUp); // Accessing Like menu item
         this.dislike = menu.findItem(R.id.thumbDown); // Accessing Dislike menu item
+        // Deciding visibility of menu items
+        if( MyPreferenceManager.getMySharedPreferences(this)
+                .getString(MyPreferenceManager.USER_TYPE, null).equals(MyPreferenceManager.REGULAR_USER)) {
+            this.like.setVisible(true); // Making visible
+            this.dislike.setVisible(true); // Making visible
+        }
         return true;
     }
 
@@ -142,7 +149,7 @@ public class ChatActivity extends AppCompatActivity {
     // Initialize variable values
     private void initValues() {
         // Firebase Messages database
-        messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES); // Messages database
+        messageRef = FirebaseDatabase.getInstance().getReference().child(Utility.MESSAGES);  //.child(chatID); // Messages database
 
         // Regular users database
         customerDatabase = FirebaseDatabase.getInstance().getReference().child(Utility.USERS)
@@ -176,16 +183,12 @@ public class ChatActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         messageList = findViewById(R.id.messageList); // RecyclerView
+
         // Setting adapter
         layoutManager = new LinearLayoutManager(this); // Linear layout manager
         messageAdapter = new MessageAdapter(new ArrayList<MessageModel>(),userId, chatterName, this); // Messages adapter
         messageList.setLayoutManager(layoutManager); // Setting layout manager
         messageList.setAdapter(messageAdapter); // Setting messages adapter
-        // Deciding visibility of menu items
-        if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
-            this.like.setVisible(true); // Making visible
-            this.dislike.setVisible(true); // Making visible
-        }
     }
 
     // Load messages
@@ -195,6 +198,7 @@ public class ChatActivity extends AppCompatActivity {
             // On data change
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+
                 // If there is any data
                 if(snapshot.exists() && snapshot.getChildrenCount()>0) {
                     ArrayList<MessageModel> messages = extractMessageList(snapshot); // Extracts messages list
@@ -210,8 +214,7 @@ public class ChatActivity extends AppCompatActivity {
             // On cancellation
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(ChatActivity.this,"Message cancelled!",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatActivity.this,"Message cancelled!", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -296,7 +299,6 @@ public class ChatActivity extends AppCompatActivity {
                 messagesList.add(message); // Adding into the list
             }
         }
-
         return messagesList; // Return
     }
 

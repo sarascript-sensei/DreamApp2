@@ -1,6 +1,7 @@
 package com.unicef.dreamapp2.ui.main.main;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -75,6 +76,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * */
 
 public class VolunteerMainActivity extends FragmentActivity implements OnMapReadyCallback {
+    private static final String TAG = "VolunteerMainActivity";
     // Global variables
     private GoogleMap mMap; // Google map
     private SupportMapFragment mapFragment; // Map fragment
@@ -99,6 +101,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private CircleImageView mProfileImage;
     // Logging out
     private Boolean isLoggingOut = false;
+    private Boolean isShowingBottom = false;
     // Layout
     private LinearLayout mCustomerInfo;
     // TextView
@@ -131,10 +134,10 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                 public boolean onSingleClick(MenuItem item) {
                     switch (item.getItemId()) {
                         // History
-                        case R.id.history:
+                     /*   case R.id.history:
                             drawerLayout.closeDrawers();
                             Toast.makeText(VolunteerMainActivity.this, "History!", Toast.LENGTH_SHORT).show();
-                            break;
+                            break;*/
                             // Chat
                         case R.id.chat:
                             startActivity(new Intent(VolunteerMainActivity.this, ChatListActivity.class));
@@ -225,6 +228,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
      *  Showing help requester information as bottom sheet dialog
      * */
     private void showBottomSheetDialog() {
+        // isShowingBottom = true;
         // Root view
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null); // Inflates layout_bottom
         // TextView
@@ -238,13 +242,26 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         Button help = view.findViewById(R.id.helpButton);
         final BottomSheetDialog dialog = new BottomSheetDialog(this); // Creates bottom sheet dialog
         dialog.setContentView(view); // Sets content
+        // On dialog dismiss listener
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+               // isShowingBottom = false;
+            }
+        });
         dialog.show(); // Shows user information dialog
         // Sets on click listener
         help.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
                 dialog.hide();
-                startChatActivity(customerId);
+                if(!customerId.equals(userId)) { // If it is not the same user
+                    startChatActivity(customerId); // Launches activity
+                } else {
+                    // Prompt to the user that this is himself
+                    Toast.makeText(VolunteerMainActivity.this, "Это вы!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
             }
         });
         // Call on click
@@ -490,9 +507,13 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     //-----------------------------------------------------------------------------------------------------------------------
     // Connects driver
     private void connectDriver() {
-        checkLocationPermission();
-        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-        mMap.setMyLocationEnabled(true);
+        try {
+            checkLocationPermission();
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+            mMap.setMyLocationEnabled(true);
+        } catch(NullPointerException error) {
+            Log.d(TAG, "connectDriver: "+error);
+        }
     }
     // Disconnects driver
     private void disconnectDriver() {

@@ -62,10 +62,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         MessageModel message = messageList.get(position);
 
         // The current user's own message
-        if (message.senderId.equals(userId)) {
+        if ( message.senderId.equals(userId) ) {
+            holder.messageText1.setVisibility(View.GONE); // Showing message
             holder.messageText2.setVisibility(View.VISIBLE); // Showing message
             holder.messageText2.setText(("Вы:\n" + message.message)); // Setting message text
         } else { // The other chatter's message
+            holder.messageText2.setVisibility(View.GONE); // Showing message
             holder.messageText1.setVisibility(View.VISIBLE); // Showing message
             holder.messageText1.setText((chatterName + ":\n" + message.message)); // Setting message text
         }
@@ -87,9 +89,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             super(view);
             // Views initialize
             messageText1 = view.findViewById(R.id.messageText1);
-            messageText1.setVisibility(View.GONE);
             messageText2 = view.findViewById(R.id.messageText2);
-
         }
     }
 }

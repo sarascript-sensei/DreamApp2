@@ -9,6 +9,6 @@ package com.unicef.dreamapp2;
 
 public interface BaseInterface {
     interface OnItemClickListener {
-        public void onItemClick(Object object);
+        void onItemClick(Object object);
     }
 }

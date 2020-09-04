@@ -140,10 +140,10 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                 public boolean onSingleClick(MenuItem item) {
                     switch (item.getItemId()) {
                         // History
-                        case R.id.history:
+                      /*  case R.id.history:
                             drawerLayout.closeDrawers();
                             Toast.makeText(CustomerMainActivity.this, "History!", Toast.LENGTH_SHORT).show();
-                            break;
+                            break;*/
                             // Chat
                         case R.id.chat:
                             startActivity(new Intent(CustomerMainActivity.this, ChatListActivity.class));
