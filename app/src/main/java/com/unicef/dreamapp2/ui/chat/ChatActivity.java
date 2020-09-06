@@ -71,24 +71,19 @@ public class ChatActivity extends AppCompatActivity {
     private String chatID = null; // Chat ID
     private String key = null; // Key
     private String userId = null; // User id
-
+    private int likes = 0; // Number of likes of the volunteer
     // RecyclerView
     private RecyclerView messageList;
     private LinearLayoutManager layoutManager; // layout manager
-
     // ImageView
     private ImageView sendBtn;
-
     // EditText
     private EditText messageEdit;
-
     // Chat model
     private MessageModel chatModel;
-
     // Menu item
     private MenuItem like;
     private MenuItem dislike;
-
     // Shared preferences
     private SharedPreferences shared;
 
@@ -139,10 +134,10 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.thumbUp: // User is thankful for the volunteer
-                Toast.makeText(this, "Liked!", Toast.LENGTH_SHORT).show();
+                likeVolunteer(); // Like
                 break;
             case R.id.thumbDown: // Did not help or did it badly
-                Toast.makeText(this, "Disliked!", Toast.LENGTH_SHORT).show();
+                dislikeVolunteer(); // Dislike
                 break;
             case android.R.id.home: // On home arrow pressed
                 finish();
@@ -232,6 +227,20 @@ public class ChatActivity extends AppCompatActivity {
                 sendMessage(messageEdit.getText().toString());
             }
         });
+        // Get volunteer's total likes
+        volunteerDatabase.child(volunteerId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists() && snapshot.getChildrenCount()>0) {
+                    HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue(); // Get the map
+                    likes =Integer.parseInt(Objects.requireNonNull(map.get(Utility.LIKES)).toString()); // Get volunteer's likes
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Cancelled
+            }
+        });
     }
 
     // Create channel
@@ -310,9 +319,24 @@ public class ChatActivity extends AppCompatActivity {
         return new MessageModel(senderId, messageText);
     }
 
-    // Removes Messages databases from volunteer's and user's profile databases
-    private void removeMessages() {
+    // Give thumb up to the volunteer
+    private void likeVolunteer() {
+        likes++;
+        volunteerDatabase.child(volunteerId).child(Utility.LIKES).setValue(likes);
+        removeQuitMessages();
+    }
 
+    // Give thumb down to the volunteer
+    private void dislikeVolunteer() {
+        removeQuitMessages();
+    }
+
+    // Removes Messages databases from volunteer's and user's profile databases
+    private void removeQuitMessages() {
+        messageRef.child(chatID).removeValue();
+        volunteerDatabase.child(volunteerId).child(Utility.MESSAGES).child(chatID).removeValue();
+        customerDatabase.child(customerId).child(Utility.MESSAGES).child(chatID).removeValue();
+        finish();
     }
 
     // On pause
