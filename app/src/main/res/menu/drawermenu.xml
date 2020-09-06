@@ -11,6 +11,11 @@
         android:icon="@drawable/ic_outline_chat_24"
         android:title="Чат"
         android:checkable="false" />
+      <item
+          android:id="@+id/rating"
+          android:icon="@drawable/ic_outline_thumb_up_24"
+          android:title="Рейтинг"
+          android:checkable="false" />
     <item
         android:id="@+id/change_profile"
         android:icon="@drawable/ic_outline_account_box_24"

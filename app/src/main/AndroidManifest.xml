@@ -37,7 +37,9 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".ui.chat.ChatListActivity"></activity>
+        <activity android:name=".ui.chat.ChatListActivity"/>
+
+        <activity android:name=".ui.rating.RatingListActivity"/>
         <!--
           The API key for Google Maps-based APIs is defined as a string resource.
           (See the file "res/values/google_maps_api.xml").

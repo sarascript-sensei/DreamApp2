@@ -59,6 +59,7 @@ import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListe
 import com.unicef.dreamapp2.ui.chat.ChatActivity;
 import com.unicef.dreamapp2.ui.chat.ChatListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
+import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
 import java.util.ArrayList;
@@ -137,19 +138,24 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                 @Override
                 public boolean onSingleClick(MenuItem item) {
                     switch (item.getItemId()) {
-                        // History
-                     /*   case R.id.history:
-                            drawerLayout.closeDrawers();
-                            Toast.makeText(VolunteerMainActivity.this, "History!", Toast.LENGTH_SHORT).show();
-                            break;*/
-                            // Chat
+                        // Chat
                         case R.id.chat:
-                            startActivity(new Intent(VolunteerMainActivity.this, ChatListActivity.class));
+                            // Launch chat list activity
+                            startActivity(new Intent(VolunteerMainActivity.this,
+                                    ChatListActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
+                        case R.id.rating:
+                            // Launch rating list activity
+                            startActivity(new Intent(VolunteerMainActivity.this,
+                                    RatingListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Edit profile
                         case R.id.change_profile:
-                            startActivity(new Intent(VolunteerMainActivity.this, ProfileActivity.class));
+                            // Profile activity
+                            startActivity(new Intent(VolunteerMainActivity.this,
+                                    ProfileActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Logs out
@@ -166,21 +172,41 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     @Override
     protected void onStart() {
         super.onStart();
-        // Initializing volunteer data event listener
-        // volunteerEventListener = ;
-        //---------------------------------------------------------------------------------------------------
+
         // Initialize customer event value listener
-        //customerEventListener = ;
+        customerEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
+                    // Map data structure
+                    try {
+                        Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                        customerName = map.get("name").toString(); // Getting user name
+                        userProblemStr = map.get("problem").toString(); // Getting user's problem
+                        userPhoneStr = map.get("phone").toString(); // Getting user's phone
+                        imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
+                        showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
+                    } catch(Exception error) {
+                        Log.d(TAG, "loadCustomerInformation, error: "+error.getLocalizedMessage());
+                    }
+                }
+                // Null pointer exception thrown
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Cancelled
+            }
+        };
     }
 
     @Override
     protected void onPause() {
-       /* if(volunteerEventListener!=null && mUserInfoDatabase!=null) {
-            mUserInfoDatabase.removeEventListener(volunteerEventListener);
-        }
+//        if(volunteerEventListener!=null && mUserInfoDatabase!=null) {
+//            mUserInfoDatabase.removeEventListener(volunteerEventListener);
+//        }
         if(customerEventListener!=null && mCustomerInfoDatabase!=null) {
             mCustomerInfoDatabase.removeEventListener(customerEventListener);
-        }*/
+        }
         super.onPause();
     }
     //--------------------------------------------------ON-CREATE-ACTIVITY----------------------------------------------------------------
@@ -398,29 +424,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private void loadCustomerInformation(String uid) {
         try {
             // Loads regular information from database
-            mCustomerInfoDatabase.child(uid).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
-                        // Map data structure
-                        try {
-                            Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-                            customerName = map.get("name").toString(); // Getting user name
-                            userProblemStr = map.get("problem").toString(); // Getting user's problem
-                            userPhoneStr = map.get("phone").toString(); // Getting user's phone
-                            imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
-                            showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
-                        } catch(Exception error) {
-                            Log.d(TAG, "loadCustomerInformation, error: "+error.getLocalizedMessage());
-                        }
-                    }
-                    // Null pointer exception thrown
-                }
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    // Cancelled
-                }
-            });
+            mCustomerInfoDatabase.child(uid).addValueEventListener(customerEventListener);
         } catch(Exception error) {
             Log.d(TAG, "loadCustomerInformation, error: "+error.getLocalizedMessage());
         }

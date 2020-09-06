@@ -3,6 +3,7 @@ package com.unicef.dreamapp2.ui.login;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CodeActivity extends AppCompatActivity {
 
+    private String TAG = "CodeActivity";
+
     // Global variables
     private EditText codeEditText;
     private Button confirmBtn;
@@ -39,7 +42,7 @@ public class CodeActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
 
     private String mVerificationId;
-    private String mobile;
+    private String phone;
     private PhoneAuthProvider.ForceResendingToken mResendToken;
 
     private SharedPreferences shared = null;
@@ -80,7 +83,7 @@ public class CodeActivity extends AppCompatActivity {
         @Override
         public void onVerificationFailed(@NonNull FirebaseException e) {
             // Verification failed due to wrong configurations with Firebase
-            // Log.d(TAG, "onVerificationFailed:" + e.getLocalizedMessage());
+            Log.d(TAG, "onVerificationFailed:" + e.getLocalizedMessage());
         }
     };
 
@@ -90,19 +93,20 @@ public class CodeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_code);
 
+        // Initialize views
         initView();
 
+        // Firebase auth
         mAuth = FirebaseAuth.getInstance();
 
         // Phone number from the previous step (Enter number)
-        mobile = getIntent().getStringExtra("mobile");
+        phone = getIntent().getStringExtra("mobile");
         // Send verification code to the given number
-        sendVerificationCode(mobile);
+        sendVerificationCode(phone);
 
         // Shared preferences
         shared = MyPreferenceManager.getMySharedPreferences(this);
         editor = shared.edit();
-
     }
 
     // Initializes views
@@ -154,6 +158,7 @@ public class CodeActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Intent intent = new Intent(CodeActivity.this, ProfileActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.putExtra("mobile", phone);
                             intent.putExtra("setup", true);
                             startActivity(intent);
                         } else {
@@ -166,85 +171,7 @@ public class CodeActivity extends AppCompatActivity {
                     }
                 });
     }
-
-    private void startUserMainActivity() {
-      //  startActivity(new Intent(this, UserMainActivity.class));
-        finish();
-    }
-
-    private void startVolunteerMainActivity() {
-      //  startActivity(new Intent(this, VolunteerMainActivity.class));
-        finish();
-    }
-
-   /* @Override
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(firebaseAuthListener);
-    }
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mAuth.removeAuthStateListener(firebaseAuthListener);
-    }*/
 }
 
 
 
-  /* mAuth = FirebaseAuth.getInstance();
-
-        firebaseAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if(user!=null){
-                    Intent intent = new Intent(CodeActivity.this, PersonMapActivity.class);
-                    startActivity(intent);
-                    finish();
-                    return;
-                }
-            }
-        };
-
-        mEmail = (EditText) findViewById(R.id.email);
-        mPassword = (EditText) findViewById(R.id.password);
-
-        mLogin = (Button) findViewById(R.id.login);
-        mRegistration = (Button) findViewById(R.id.registration);
-
-        mRegistration.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String email = mEmail.getText().toString();
-                final String password = mPassword.getText().toString();
-                mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(CodeActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(!task.isSuccessful()){
-                            Toast.makeText(CodeActivity.this, "sign up error", Toast.LENGTH_SHORT).show();
-                        }else{
-                            String user_id = mAuth.getCurrentUser().getUid();
-                            DatabaseReference current_user_db = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(user_id);
-                            current_user_db.setValue(email);
-                        }
-                    }
-                });
-            }
-        });
-
-        mLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String email = mEmail.getText().toString();
-                final String password = mPassword.getText().toString();
-                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(CodeActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(!task.isSuccessful()){
-                            Toast.makeText(CodeActivity.this, "sign in error", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-            }
-        });*/

@@ -58,6 +58,7 @@ import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChatListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
+import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
 import java.util.ArrayList;
@@ -147,6 +148,11 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             // Chat
                         case R.id.chat:
                             startActivity(new Intent(CustomerMainActivity.this, ChatListActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
+                        case R.id.rating:
+                            // Launch rating list activity
+                            startActivity(new Intent(CustomerMainActivity.this, RatingListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Change profile

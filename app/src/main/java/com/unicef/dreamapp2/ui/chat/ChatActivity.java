@@ -270,20 +270,6 @@ public class ChatActivity extends AppCompatActivity {
         messagesCustomer.child(Utility.CHATTER_NAME).setValue(volunteerName); // Volunteer name
         messagesCustomer.child(Utility.CUSTOMER_NAME).setValue(customerName); // Customer name
         messagesCustomer.child(Utility.VOLUNTEER_NAME).setValue(volunteerName); // Volunteer name
-        volunteerDatabase.child(volunteerId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists() && snapshot.getChildrenCount() > 0) {
-                    // Map data structure
-                    Map<String, Object> map = (Map<String, Object>) snapshot.getValue();
-                    messagesCustomer.child(Utility.LIKES).setValue(map.get("likes"));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
 
         // Binding volunteer to the customer
         DatabaseReference messageVolunteer = volunteerDatabase.child(volunteerId).child(Utility.MESSAGES).child(chatID);

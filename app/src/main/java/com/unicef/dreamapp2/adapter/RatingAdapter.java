@@ -1,6 +1,7 @@
 package com.unicef.dreamapp2.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.unicef.dreamapp2.BaseInterface;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.model.ChannelModel;
+import com.unicef.dreamapp2.model.RatingModel;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 
 import java.util.List;
@@ -25,25 +27,28 @@ import java.util.List;
  *
  * */
 
-public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageViewHolder> {
+public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.MessageViewHolder> {
+
+    private String TAG = "RatingAdapter";
 
     // Global variables
-    private List<ChannelModel> channelsList;
+    private List<RatingModel> ratingsList;
     private BaseInterface.OnItemClickListener onItemClickListener;
     private Context context;
 
     // Adapter constructor
-    public ChannelAdapter(List<ChannelModel> channelsList, Context context, BaseInterface.OnItemClickListener onItemClickListener) {
-        this.channelsList = channelsList; // Channels list
+    public RatingAdapter(List<RatingModel> ratingsList, Context context,
+                         BaseInterface.OnItemClickListener onItemClickListener) {
+        this.ratingsList = ratingsList; // Channels list
         this.context = context; // Context
         this.onItemClickListener = onItemClickListener;
     }
 
     // Sets values
-    public void setValues(List<ChannelModel > messageList) {
-         this.channelsList.clear();
-         if(messageList!=null) { // If the list is not empty
-             this.channelsList.addAll(messageList); // Adding all message lists
+    public void setValues(List<RatingModel> list) {
+         this.ratingsList.clear();
+         if(list!=null) { // If the list is not empty
+             this.ratingsList.addAll(list); // Adding all message lists
          }
          this.notifyDataSetChanged(); // Notify data set change
     }
@@ -52,7 +57,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
     @Override
     public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.channel_item, parent, false);
+                .inflate(R.layout.volunteer_rating_item, parent, false);
 
         return new MessageViewHolder(itemView, onItemClickListener);
     }
@@ -60,32 +65,38 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
     // On bind view holder
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.name.setText(channelsList.get(position).getChatterName()); // Sets the chatter's name
+        try {
+            holder.name.setText(ratingsList.get(position).getVolunteerName()); // Set volunteer name
+            holder.likesNumber.setText((""+ratingsList.get(position).getLikes())); // Set number of likes
+        } catch(Exception error) {
+            Log.d(TAG, "onBindViewHolder, error: "+error.getLocalizedMessage());
+        }
+        // Log.d(TAG, "onBindViewHolder, likes: "+ratingsList.get(position).getLikes());
     }
 
     @Override
     public int getItemCount() {
-        return channelsList != null ? channelsList.size() : 0;
+        return ratingsList != null ? ratingsList.size() : 0;
     }
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         // Global variables
         private TextView name; // Name
-        private TextView lastMessage; // Last message
+        private TextView likesNumber; // Likes number
 
         // Message view holder
         private MessageViewHolder(View view, final BaseInterface.OnItemClickListener onItemClickListener) {
             super(view);
-            itemView.setOnClickListener(new OnSingleClickListener() {
-                @Override
-                public void onSingleClick(View view) {
-                    onItemClickListener.onItemClick(channelsList.get(getAdapterPosition()));
-                }
-            });
+//            itemView.setOnClickListener(new OnSingleClickListener() {
+//                @Override
+//                public void onSingleClick(View view) {
+//                    onItemClickListener.onItemClick(ratingsList.get(getAdapterPosition()));
+//                }
+//            });
             // Views initialize
-            name = view.findViewById(R.id.chatterName);
-            lastMessage = view.findViewById(R.id.lastMessage);
+            name = view.findViewById(R.id.name);
+            likesNumber = view.findViewById(R.id.likesNumberText);
         }
     }
 }

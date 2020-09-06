@@ -167,7 +167,6 @@ public class ChatListActivity extends AppCompatActivity {
         channelModel.setChatterName(Objects.requireNonNull(channel.get(Utility.CHATTER_NAME)).toString());
         channelModel.setCustomerName(Objects.requireNonNull(channel.get(Utility.CUSTOMER_NAME)).toString());
         channelModel.setVolunteerName(Objects.requireNonNull(channel.get(Utility.VOLUNTEER_NAME)).toString());
-        channelModel.setLikes(Integer.parseInt(Objects.requireNonNull(channel.get(Utility.LIKES)).toString()));
 
         if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) { // This is the user's chat, not a volunteer
             channelModel.setCustomerId(userId); // Customer id
@@ -182,9 +181,8 @@ public class ChatListActivity extends AppCompatActivity {
     // Start chat with the chosen customer
     private void startChatActivity(ChannelModel channel) {
         Intent intent = new Intent(ChatListActivity.this, ChatActivity.class);
-        String channelData = channel.getChatterName()+"\n"+channel.getCustomerName()+"\n"+channel.getVolunteerName()
-                +"\n"+channel.getCustomerId()+"\n"+ channel.getVolunteerId();
-
+//        String channelData = channel.getChatterName()+"\n"+channel.getCustomerName()+"\n"+channel.getVolunteerName()
+        //                +"\n"+channel.getCustomerId()+"\n"+ channel.getVolunteerId();
       //  Toast.makeText(this, channelData, Toast.LENGTH_LONG).show();
 
         intent.putExtra("chatterName", channel.getChatterName()); // Chatter name
@@ -192,7 +190,6 @@ public class ChatListActivity extends AppCompatActivity {
         intent.putExtra("volunteerName", channel.getVolunteerName()); // Volunteer name
         intent.putExtra("customerId", channel.getCustomerId()); // Set customer id
         intent.putExtra("volunteerId", channel.getVolunteerId()); // Set volunteer id
-
         startActivity(intent);
     }
 }

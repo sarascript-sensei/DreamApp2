@@ -32,6 +32,7 @@ import com.unicef.dreamapp2.ui.main.main.VolunteerMainActivity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -64,12 +65,14 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference mCustomerDatabase;
 
     // String variables
-    private String userID = null;
-    private String mName = null;
-    private String mPhone = null;
-    private String imageBase64 = null;
-    private String mProblem = null;
-    private String mUserType = null;
+    private String userID = null; // UID
+    private String mName = null; // User name
+    private String mPhone = null; // User phone
+    private String imageBase64 = null; // USer image base64
+    private String mProblem = null; // User's problem
+    private String mUserType = null; // User type
+    private String phone; // Phone
+    private int likes = 0; // Number of likes
 
     // Image URI
     private Uri resultUri;
@@ -95,6 +98,9 @@ public class ProfileActivity extends AppCompatActivity {
             // This is the first time launch, therefore it should behave a bit differently
             isSetup = getIntent().getBooleanExtra("setup", false);
 
+            // Getting phone number from the previous step
+            phone = getIntent().getStringExtra("mobile");
+
             // Initializes views
             initView();
 
@@ -107,8 +113,8 @@ public class ProfileActivity extends AppCompatActivity {
             // Firebase database
             mCustomerDatabase = FirebaseDatabase.getInstance()
                     .getReference()
-                    .child("Users")
-                    .child(shared.getString(MyPreferenceManager.USER_TYPE, null))
+                    .child(Utility.USERS)
+                    .child(Objects.requireNonNull(shared.getString(MyPreferenceManager.USER_TYPE, null)))
                     .child(userID);
 
             // Loads user info from Firebase database
@@ -173,26 +179,31 @@ public class ProfileActivity extends AppCompatActivity {
                         // Map data structure
                         Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                         // User name
-                        if (map.get("name") != null) {
+                        if (map.get("name") != null) { // Of name is not empty
                             mName = map.get("name").toString();
                             mNameField.setText(mName);
                         }
                         // User phone
-                        if (map.get("phone") != null) {
+                        if (map.get("phone") != null) { // If phone is not empty
                             mPhone = map.get("phone").toString();
                             mPhoneField.setText(mPhone);
+                        } else {
+                            mPhoneField.setText(phone);
                         }
                         // User problem
-                        if (map.get("problem") != null) {
+                        if (map.get("problem") != null) { // If problem is not empty
                             mProblem = map.get("problem").toString();
                             mProblemField.setText(mProblem);
                         }
                         // User profile image URI
-                        if (map.get("profileImageUrl") != null) {
+                        if (map.get("profileImageUrl") != null) { // if is not empty
                             imageBase64 = map.get("profileImageUrl").toString();
-                            Glide.with(getApplication())
-                                    .load(Utility.getBitmapFromBase64(imageBase64))
+                            Glide.with(getApplication()).load(Utility.getBitmapFromBase64(imageBase64))
                                     .into(mProfileImage);
+                        }
+                        // User's number of likes (for volunteer)
+                        if (map.get(Utility.LIKES) != null) { // if is not empty
+                            likes = Integer.parseInt(Objects.requireNonNull(map.get(Utility.LIKES)).toString());
                         }
                     }
                 } catch(NullPointerException error) {
@@ -233,7 +244,7 @@ public class ProfileActivity extends AppCompatActivity {
         userInfo.put("name", mName);
         userInfo.put("phone", mPhone);
         userInfo.put("problem", mProblem);
-        userInfo.put("likes", 0);
+        userInfo.put("likes", likes);
 
         // Saving path to the profile image
         if(imageBase64!=null) {
