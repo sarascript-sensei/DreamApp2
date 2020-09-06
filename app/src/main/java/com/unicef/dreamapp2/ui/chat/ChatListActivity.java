@@ -165,14 +165,15 @@ public class ChatListActivity extends AppCompatActivity {
         ChannelModel channelModel = new ChannelModel(); // Create channel model
         // Chatter name
         channelModel.setChatterName(Objects.requireNonNull(channel.get(Utility.CHATTER_NAME)).toString());
-        channelModel.setCustomerName(channel.get(Utility.CUSTOMER_NAME).toString());
-        channelModel.setVolunteerName(channel.get(Utility.VOLUNTEER_NAME).toString());
+        channelModel.setCustomerName(Objects.requireNonNull(channel.get(Utility.CUSTOMER_NAME)).toString());
+        channelModel.setVolunteerName(Objects.requireNonNull(channel.get(Utility.VOLUNTEER_NAME)).toString());
+        channelModel.setLikes(Integer.parseInt(Objects.requireNonNull(channel.get(Utility.LIKES)).toString()));
 
         if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) { // This is the user's chat, not a volunteer
             channelModel.setCustomerId(userId); // Customer id
-            channelModel.setVolunteerId(channel.get(Utility.CHATTER_ID).toString()); // Chatter's id
+            channelModel.setVolunteerId(Objects.requireNonNull(channel.get(Utility.CHATTER_ID)).toString()); // Chatter's id
         } else {
-            channelModel.setCustomerId(channel.get(Utility.CHATTER_ID).toString()); // Chatter's id
+            channelModel.setCustomerId(Objects.requireNonNull(channel.get(Utility.CHATTER_ID)).toString()); // Chatter's id
             channelModel.setVolunteerId(userId); // Volunteer id
         }
         return channelModel; // return

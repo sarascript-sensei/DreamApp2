@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -59,7 +60,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
     // On bind view holder
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.name.setText((channelsList.get(position).getChatterName()));
+        holder.name.setText((channelsList.get(position).getChatterName())); // Sets the chatter's name
+      //  int likes = channelsList.get(position).getLikes(); // Gets the number of likes
+      //  holder.likesNumber.setText(likes); // Sets the likes
+       // if(likes > 0) holder.likesLayout.setVisibility(View.VISIBLE); // Do not show likes if there's none
         // holder.lastMessage.setText(("Вы:\n"+messageList.get(position)));
     }
 
@@ -71,8 +75,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         // Global variables
-        private TextView name;
-        private TextView lastMessage;
+        private TextView name; // Name
+        private TextView lastMessage; // Last message
+        private TextView likesNumber; // Likes number
+        private LinearLayout likesLayout; // Likes layout
 
         // Message view holder
         private MessageViewHolder(View view, final BaseInterface.OnItemClickListener onItemClickListener) {
@@ -86,6 +92,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
             // Views initialize
             name = view.findViewById(R.id.chatterName);
             lastMessage = view.findViewById(R.id.lastMessage);
+          //  likesNumber = view.findViewById(R.id.likesNumberText);
+          //  likesLayout = view.findViewById(R.id.likesLayout);
         }
     }
 }

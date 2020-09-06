@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,8 +33,11 @@ import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.model.MessageModel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * @author Iman Augustine
@@ -118,12 +122,12 @@ public class ChatActivity extends AppCompatActivity {
     // Toolbar menu inflated
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        mUserType =  MyPreferenceManager.getMySharedPreferences(this).getString(MyPreferenceManager.USER_TYPE, null);
         getMenuInflater().inflate(R.menu.toolbar_menu, menu); // Inflating menu
         this.like = menu.findItem(R.id.thumbUp); // Accessing Like menu item
         this.dislike = menu.findItem(R.id.thumbDown); // Accessing Dislike menu item
         // Deciding visibility of menu items
-        if( MyPreferenceManager.getMySharedPreferences(this)
-                .getString(MyPreferenceManager.USER_TYPE, null).equals(MyPreferenceManager.REGULAR_USER)) {
+        if(mUserType.equals(MyPreferenceManager.REGULAR_USER)) {
             this.like.setVisible(true); // Making visible
             this.dislike.setVisible(true); // Making visible
         }
@@ -198,7 +202,6 @@ public class ChatActivity extends AppCompatActivity {
             // On data change
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 // If there is any data
                 if(snapshot.exists() && snapshot.getChildrenCount()>0) {
                     ArrayList<MessageModel> messages = extractMessageList(snapshot); // Extracts messages list
@@ -262,11 +265,25 @@ public class ChatActivity extends AppCompatActivity {
     // Connect chatters to the channel
     private void bindToChannel() {
         // Binding customer to the volunteer
-        DatabaseReference messagesCustomer = customerDatabase.child(customerId).child(Utility.MESSAGES).child(chatID);
+        final DatabaseReference messagesCustomer = customerDatabase.child(customerId).child(Utility.MESSAGES).child(chatID);
         messagesCustomer.child(Utility.CHATTER_ID).setValue(volunteerId); // Chatter id
         messagesCustomer.child(Utility.CHATTER_NAME).setValue(volunteerName); // Volunteer name
         messagesCustomer.child(Utility.CUSTOMER_NAME).setValue(customerName); // Customer name
         messagesCustomer.child(Utility.VOLUNTEER_NAME).setValue(volunteerName); // Volunteer name
+        volunteerDatabase.child(volunteerId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists() && snapshot.getChildrenCount() > 0) {
+                    // Map data structure
+                    Map<String, Object> map = (Map<String, Object>) snapshot.getValue();
+                    messagesCustomer.child(Utility.LIKES).setValue(map.get("likes"));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
 
         // Binding volunteer to the customer
         DatabaseReference messageVolunteer = volunteerDatabase.child(volunteerId).child(Utility.MESSAGES).child(chatID);
@@ -280,26 +297,31 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<MessageModel> extractMessageList(DataSnapshot snapshot) {
 
         ArrayList<MessageModel> messagesList = new ArrayList<>(); // List of messages that will be returned
-        HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
+        HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue(); // Get the entire map
         HashMap<String, Object> chatMap = (HashMap<String, Object>) map.get(chatID); // Messages
-        MessageModel message;
 
-        if(chatMap!=null)
+        if( chatMap!=null ) // If chat map is not empty
         {
+            TreeMap<String, Object> orderedMap = new TreeMap<>(chatMap);
+            MessageModel message; // Message utility
+
             HashMap<String, Object> messages; // Messages map
-            Object[] keySet = chatMap.keySet().toArray(); // Key set
+            Object[] keySet = orderedMap.keySet().toArray(); // Key set
 
             // Loops through messages HashMap
             for (Object o : keySet) {
                 // Getting message map by key
                 messages = (HashMap<String, Object>) chatMap.get(o.toString());
-                message = new MessageModel(); // Newly created message
-                message.senderId = messages.get("senderId").toString(); // Sender id
-                message.message = messages.get("message").toString(); // Message body
-                messagesList.add(message); // Adding into the list
+                messagesList.add(extractMessage( messages.get("senderId").toString(),
+                        messages.get("message").toString())); // Adding into the list
             }
         }
         return messagesList; // Return
+    }
+
+    // Extracting message
+    private MessageModel extractMessage(String senderId, String messageText) {
+        return new MessageModel(senderId, messageText);
     }
 
     // On pause

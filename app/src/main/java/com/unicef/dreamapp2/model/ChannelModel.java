@@ -20,6 +20,7 @@ public class ChannelModel {
     public String volunteerId = null; // Volunteer id
     public String customerName = null; // Customer id
     public String volunteerName = null; // Volunteer id
+    public int likes = 0;
 
     @Exclude
     public String localMediaUrl = "";
@@ -84,5 +85,13 @@ public class ChannelModel {
 
     public String getVolunteerName() {
         return volunteerName;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public int getLikes() {
+        return likes;
     }
 }

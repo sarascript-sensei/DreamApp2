@@ -76,6 +76,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * */
 
 public class VolunteerMainActivity extends FragmentActivity implements OnMapReadyCallback {
+
     private static final String TAG = "VolunteerMainActivity";
     // Global variables
     private GoogleMap mMap; // Google map
@@ -126,6 +127,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.burger, R.mipmap.oxygen, R.mipmap.car, R.mipmap.sos };
     // Marker map
     private Map<Marker, Object> markersMap = new HashMap<>();
+    // Value event listener
+    private ValueEventListener volunteerEventListener;
+    private ValueEventListener customerEventListener;
 
     // On navigation item selected listener in the drawer layout
     private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
@@ -157,38 +161,70 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                     return true;
                 }
             };
+    //------------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Initializing volunteer data event listener
+        // volunteerEventListener = ;
+        //---------------------------------------------------------------------------------------------------
+        // Initialize customer event value listener
+        //customerEventListener = ;
+    }
+
+    @Override
+    protected void onPause() {
+       /* if(volunteerEventListener!=null && mUserInfoDatabase!=null) {
+            mUserInfoDatabase.removeEventListener(volunteerEventListener);
+        }
+        if(customerEventListener!=null && mCustomerInfoDatabase!=null) {
+            mCustomerInfoDatabase.removeEventListener(customerEventListener);
+        }*/
+        super.onPause();
+    }
     //--------------------------------------------------ON-CREATE-ACTIVITY----------------------------------------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_volunteer_main);
-        // Initializes views
-        initView();
-        // Shared preferences
-        shared = MyPreferenceManager.getMySharedPreferences(this);
-        // User type
-        mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
-        // Firebase realtime database
-        mAuth = FirebaseAuth.getInstance();
-        // User ID
-        userId = mAuth.getCurrentUser().getUid();
-        // Firebase database, user info database
-        mUserInfoDatabase = FirebaseDatabase.getInstance().getReference()
-                .child("Users")
-                .child(mUserType)
-                .child(userId);
-        // Firebase database, help requests database
-        mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference()
-                .child("Users")
-                .child("HelpRequests");
-        // Firebase database, regular users database
-        mCustomerInfoDatabase = FirebaseDatabase.getInstance().getReference()
-                .child("Users")
-                .child(MyPreferenceManager.REGULAR_USER);
-        // Loads volunteer's information
-        loadVolunteerInfo();
-        // Fused location client initialized
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        try {
+            // Initializes views
+            initView();
+            // Shared preferences
+            shared = MyPreferenceManager.getMySharedPreferences(this);
+            // User type
+            mUserType = shared.getString(MyPreferenceManager.USER_TYPE, null);
+            // Firebase realtime database
+            mAuth = FirebaseAuth.getInstance();
+            // User ID
+            userId = mAuth.getCurrentUser().getUid();
+            // Firebase database, user info database
+            mUserInfoDatabase = FirebaseDatabase.getInstance().getReference()
+                    .child("Users")
+                    .child(mUserType)
+                    .child(userId);
+            // Firebase database, help requests database
+            mHelpRequestDatabase = FirebaseDatabase.getInstance().getReference()
+                    .child("Users")
+                    .child("HelpRequests");
+            // Firebase database, regular users database
+            mCustomerInfoDatabase = FirebaseDatabase.getInstance().getReference()
+                    .child("Users")
+                    .child(MyPreferenceManager.REGULAR_USER);
+            // Loads volunteer's information
+            loadVolunteerInfo();
+            // Fused location client initialized
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            // Caught some error
+        } catch(Exception error) {
+            Log.d(TAG, "onCreate, error: "+error.getLocalizedMessage()); // Print the error message
+        }
+    }
+    //-----------------------------------------------------------------------------------------------------------------------
+    private void initValues() {
+
     }
     //-----------------------------------------------------------------------------------------------------------------------
     private void initView() {
@@ -230,6 +266,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private void showBottomSheetDialog() {
         // isShowingBottom = true;
         // Root view
+
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null); // Inflates layout_bottom
         // TextView
         ((TextView)view.findViewById(R.id.nameTextView)).setText(customerName); // User name
@@ -335,8 +372,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                         // User name
                         if (map.get("name") != null) {
-                             volunteerName = map.get("name").toString();
-                             userName.setText(volunteerName);
+                            volunteerName = map.get("name").toString();
+                            userName.setText(volunteerName);
                         }
                         // User profile image URI
                         if (map.get("profileImageUrl") != null) {
@@ -359,30 +396,34 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     //-----------------------------------------------------------------------------------------------------------------------
     // Get the assigned customer
     private void loadCustomerInformation(String uid) {
-        // Loads regular information from database
-        mCustomerInfoDatabase.child(uid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                try {
+        try {
+            // Loads regular information from database
+            mCustomerInfoDatabase.child(uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
                         // Map data structure
-                        Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-                        customerName = map.get("name").toString(); // Getting user name
-                        userProblemStr = map.get("problem").toString(); // Getting user's problem
-                        userPhoneStr = map.get("phone").toString(); // Getting user's phone
-                        imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
-                        showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
+                        try {
+                            Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                            customerName = map.get("name").toString(); // Getting user name
+                            userProblemStr = map.get("problem").toString(); // Getting user's problem
+                            userPhoneStr = map.get("phone").toString(); // Getting user's phone
+                            imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
+                            showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
+                        } catch(Exception error) {
+                            Log.d(TAG, "loadCustomerInformation, error: "+error.getLocalizedMessage());
+                        }
                     }
                     // Null pointer exception thrown
-                } catch(NullPointerException error) {
-                    Log.d("AccountSetupActivity", "onDataChange: error: "+error.getLocalizedMessage());
                 }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Cancelled
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    // Cancelled
+                }
+            });
+        } catch(Exception error) {
+            Log.d(TAG, "loadCustomerInformation, error: "+error.getLocalizedMessage());
+        }
     }
     // Start chat with the chosen customer
     private void startChatActivity(String uid) {
@@ -490,28 +531,34 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case 1: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-                        mMap.setMyLocationEnabled(true);
+        try {
+            switch (requestCode) {
+                case 1: {
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+                            mMap.setMyLocationEnabled(true);
+                        }
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Please provide the permission", Toast.LENGTH_LONG).show();
                     }
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please provide the permission", Toast.LENGTH_LONG).show();
+                    break;
                 }
-                break;
             }
+        } catch(Exception error) {
+            Log.d(TAG, "onRequestPermissionsResult, error: "+error.getLocalizedMessage());
         }
     }
     //-----------------------------------------------------------------------------------------------------------------------
     // Connects driver
     private void connectDriver() {
         try {
-            checkLocationPermission();
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-            mMap.setMyLocationEnabled(true);
-        } catch(NullPointerException error) {
+            if(mMap!=null) {
+                checkLocationPermission();
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+                mMap.setMyLocationEnabled(true);
+            }
+        } catch(Exception error) {
             Log.d(TAG, "connectDriver: "+error);
         }
     }
@@ -525,6 +572,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         GeoFire geoFire = new GeoFire(ref);
         geoFire.removeLocation(userId);
     }
-}
 
+}
 //-----------------------------------------------------------------------------------------------------------------------

@@ -33,9 +33,9 @@ public class MessageModel {
     public MessageModel(){
     }
 
-    public MessageModel(String senderId, String messageType){
+    public MessageModel(String senderId, String messageText){
         this.senderId = senderId; // Sender id
-        this.messageType = messageType; // Message type
+        this.message = messageText; // Message text
     }
 
     public Map<String, String> getTimestamp() { return ServerValue.TIMESTAMP; }

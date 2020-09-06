@@ -233,6 +233,7 @@ public class ProfileActivity extends AppCompatActivity {
         userInfo.put("name", mName);
         userInfo.put("phone", mPhone);
         userInfo.put("problem", mProblem);
+        userInfo.put("likes", 0);
 
         // Saving path to the profile image
         if(imageBase64!=null) {
