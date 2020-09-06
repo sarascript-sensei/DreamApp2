@@ -181,10 +181,6 @@ public class ChatListActivity extends AppCompatActivity {
     // Start chat with the chosen customer
     private void startChatActivity(ChannelModel channel) {
         Intent intent = new Intent(ChatListActivity.this, ChatActivity.class);
-//        String channelData = channel.getChatterName()+"\n"+channel.getCustomerName()+"\n"+channel.getVolunteerName()
-        //                +"\n"+channel.getCustomerId()+"\n"+ channel.getVolunteerId();
-      //  Toast.makeText(this, channelData, Toast.LENGTH_LONG).show();
-
         intent.putExtra("chatterName", channel.getChatterName()); // Chatter name
         intent.putExtra("customerName", channel.getCustomerName()); // Customer name
         intent.putExtra("volunteerName", channel.getVolunteerName()); // Volunteer name
