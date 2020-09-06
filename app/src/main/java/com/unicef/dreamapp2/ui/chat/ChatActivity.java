@@ -310,6 +310,11 @@ public class ChatActivity extends AppCompatActivity {
         return new MessageModel(senderId, messageText);
     }
 
+    // Removes Messages databases from volunteer's and user's profile databases
+    private void removeMessages() {
+
+    }
+
     // On pause
     @Override
     protected void onPause() {

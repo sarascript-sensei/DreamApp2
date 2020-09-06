@@ -102,7 +102,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     // Profile image
     private CircleImageView mProfileImage;
     // Logging out
-    private Boolean isLoggingOut = false;
     private Boolean isShowingBottom = false;
     // Layout
     private LinearLayout mCustomerInfo;
@@ -185,7 +184,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         userProblemStr = map.get("problem").toString(); // Getting user's problem
                         userPhoneStr = map.get("phone").toString(); // Getting user's phone
                         imageBase64 = map.get("profileImageUrl").toString(); // Image base 64 format
-                        showBottomSheetDialog(); // Shows the above accessed information as a bottom sheet dialog
+                        if(isShowingBottom) { showBottomSheetDialog(); }// Shows the above accessed information as a bottom sheet dialog
                     } catch(Exception error) {
                         Log.d(TAG, "loadCustomerInformation, error: "+error.getLocalizedMessage());
                     }
@@ -292,7 +291,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private void showBottomSheetDialog() {
         // isShowingBottom = true;
         // Root view
-
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null); // Inflates layout_bottom
         // TextView
         ((TextView)view.findViewById(R.id.nameTextView)).setText(customerName); // User name
@@ -307,11 +305,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         dialog.setContentView(view); // Sets content
         // On dialog dismiss listener
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-               // isShowingBottom = false;
-            }
-        });
+            @Override public void onDismiss(DialogInterface dialogInterface) { }});
         dialog.show(); // Shows user information dialog
         // Sets on click listener
         help.setOnClickListener(new OnSingleClickListener() {
@@ -323,26 +317,27 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                 } else {
                     // Prompt to the user that this is himself
                     Toast.makeText(VolunteerMainActivity.this, "Это вы!", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
                 }
+                dialog.dismiss();
+                isShowingBottom = false;
             }
         });
         // Call on click
-        ((ImageButton)view.findViewById(R.id.call)).setOnClickListener(new OnSingleClickListener() {
+        view.findViewById(R.id.call).setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
                 makeCall(); // Call
             }
         });
         // Send a message in WhatsApp
-        ((ImageButton)view.findViewById(R.id.whatsapp)).setOnClickListener(new OnSingleClickListener() {
+        view.findViewById(R.id.whatsapp).setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
                 sendWhatsapp(); // Launch WhatsApp
             }
         });
         // Send a message in Telegram
-        ((ImageButton)view.findViewById(R.id.telegram)).setOnClickListener(new OnSingleClickListener() {
+        view.findViewById(R.id.telegram).setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
                 sendTelegram(); // Launch Telegram
@@ -376,7 +371,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     //-----------------------------------------------------------------------------------------------------------------------
     // Log out
     private void logout() {
-        isLoggingOut = true; // Logging out
         disconnectDriver(); // Disconnects drivers
         FirebaseAuth.getInstance().signOut(); // Signs out from Firebase
         startActivity(new Intent(VolunteerMainActivity.this, WelcomeActivity.class)); // Starts WelcomeActivity
@@ -451,6 +445,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                 // Loads the selected user's information
                 customerId = Objects.requireNonNull(markersMap.get(marker)).toString();
                 loadCustomerInformation(customerId); // Passes customer ID to load profile information
+                isShowingBottom = true;
                 return true;
             }
         });
