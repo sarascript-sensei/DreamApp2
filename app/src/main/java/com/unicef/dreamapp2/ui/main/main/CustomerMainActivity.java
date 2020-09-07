@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -51,13 +50,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChatListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
+import com.unicef.dreamapp2.ui.questions.QuesionActivity;
 import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
@@ -130,7 +130,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     // Marker options to show on the Google Map
     private MarkerOptions markerOptions;
     // Array lists
-    private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
+    private String[] list = new String[]{"Лекарства", "Продукты", "Кислородный концентратор", "Попутка", "Помощь(SOS)"};
     private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.burger, R.mipmap.oxygen, R.mipmap.car, R.mipmap.sos };
     //------------------------------DRAWER-LAYOUT-NAVIGATION-LISTENER------------------------------------------------------
 
@@ -165,6 +165,12 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             drawerLayout.closeDrawers();
                             logout();
                             break;
+
+                        case R.id.question:
+                            // Questions and suggestions
+                            startActivity(new Intent(CustomerMainActivity.this,
+                                    QuesionActivity.class));
+                            drawerLayout.closeDrawers();
                     }
                     return true;
                 }

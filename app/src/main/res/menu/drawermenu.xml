@@ -21,6 +21,10 @@
         android:icon="@drawable/ic_outline_account_box_24"
         android:title="Изменить профиль"
         android:checkable="false" />
+      <item
+          android:id="@+id/question"
+          android:title="Вопросы и предложения"
+          android:checkable="false" />
     <item
         android:id="@+id/logout"
         android:icon="@drawable/ic_exit"
