@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 /**
  * @author Iman Augustine
@@ -316,6 +317,21 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         help.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
+                new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
+                        .setTarget(findViewById(R.id.helpButton))
+                        .setPrimaryText("Нажми на кноку, чтобы помочь человеку и перейти в чат")
+                        .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener()
+                        {
+                            @Override
+                            public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state)
+                            {
+                                if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
+                                {
+                                    // User has pressed the prompt target
+                                }
+                            }
+                        })
+                        .show();
                 dialog.hide();
                 if(!customerId.equals(userId)) { // If it is not the same user
                     startChatActivity(customerId); // Launches activity
@@ -352,6 +368,21 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     //-----------------------------------------------------------------------------------------------------------------------
     private void makeCall() {
         // Request a permission to make a call
+        new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
+                .setTarget(findViewById(R.id.call))
+                .setPrimaryText("Позвони напрямую по телефону")
+                .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener()
+                {
+                    @Override
+                    public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state)
+                    {
+                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
+                        {
+                            // User has pressed the prompt target
+                        }
+                    }
+                })
+                .show();
         if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(VolunteerMainActivity.this, new
@@ -363,6 +394,21 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     }
     //-----------------------------------------------------------------------------------------------------------------------
     private void sendWhatsapp() {
+        new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
+                .setTarget(findViewById(R.id.whatsapp))
+                .setPrimaryText("Отправь сообщение в WhatsApp")
+                .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener()
+                {
+                    @Override
+                    public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state)
+                    {
+                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
+                        {
+                            // User has pressed the prompt target
+                        }
+                    }
+                })
+                .show();
         String url = "https://api.whatsapp.com/send?phone="+userPhoneStr;
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     }
