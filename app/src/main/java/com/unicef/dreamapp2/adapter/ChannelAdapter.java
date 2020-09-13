@@ -1,6 +1,7 @@
 package com.unicef.dreamapp2.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import java.util.List;
 
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageViewHolder> {
 
+    private String TAG = "ChannelAdapter";
     // Global variables
     private List<ChannelModel> channelsList;
     private BaseInterface.OnItemClickListener onItemClickListener;
@@ -60,7 +62,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MessageV
     // On bind view holder
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.name.setText(channelsList.get(position).getChatterName()); // Sets the chatter's name
+        try {
+            holder.name.setText(channelsList.get(position).getChatterName()); // Sets the chatter's name
+        } catch(Exception error) {
+            Log.d(TAG, "onBindViewHolder: error: "+error.getLocalizedMessage());
+        }
     }
 
     @Override

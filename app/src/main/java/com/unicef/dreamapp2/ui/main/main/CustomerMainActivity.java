@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -56,7 +55,7 @@ import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
-import com.unicef.dreamapp2.ui.chat.ChatListActivity;
+import com.unicef.dreamapp2.ui.chat.ChannelsListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
@@ -147,7 +146,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             break;*/
                             // Chat
                         case R.id.chat:
-                            startActivity(new Intent(CustomerMainActivity.this, ChatListActivity.class));
+                            startActivity(new Intent(CustomerMainActivity.this, ChannelsListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                         case R.id.rating:

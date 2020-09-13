@@ -15,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -57,7 +56,7 @@ import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChatActivity;
-import com.unicef.dreamapp2.ui.chat.ChatListActivity;
+import com.unicef.dreamapp2.ui.chat.ChannelsListActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
@@ -141,7 +140,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         case R.id.chat:
                             // Launch chat list activity
                             startActivity(new Intent(VolunteerMainActivity.this,
-                                    ChatListActivity.class));
+                                    ChannelsListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                         case R.id.rating:

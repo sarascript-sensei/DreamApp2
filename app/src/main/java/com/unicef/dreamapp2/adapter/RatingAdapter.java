@@ -71,7 +71,6 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.MessageVie
         } catch(Exception error) {
             Log.d(TAG, "onBindViewHolder, error: "+error.getLocalizedMessage());
         }
-        // Log.d(TAG, "onBindViewHolder, likes: "+ratingsList.get(position).getLikes());
     }
 
     @Override
@@ -88,12 +87,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.MessageVie
         // Message view holder
         private MessageViewHolder(View view, final BaseInterface.OnItemClickListener onItemClickListener) {
             super(view);
-//            itemView.setOnClickListener(new OnSingleClickListener() {
-//                @Override
-//                public void onSingleClick(View view) {
-//                    onItemClickListener.onItemClick(ratingsList.get(getAdapterPosition()));
-//                }
-//            });
+
             // Views initialize
             name = view.findViewById(R.id.name);
             likesNumber = view.findViewById(R.id.likesNumberText);

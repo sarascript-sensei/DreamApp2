@@ -37,7 +37,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".ui.chat.ChatListActivity"/>
+        <activity android:name=".ui.chat.ChannelsListActivity"/>
 
         <activity android:name=".ui.rating.RatingListActivity"/>
         <!--
