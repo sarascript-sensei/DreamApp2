@@ -54,7 +54,7 @@ public class PhoneActivity extends AppCompatActivity {
 
         // Checking phone number format/correctness
         if(phone.length()<13) {
-            phoneEditText.setError("Введите верный номер");
+            phoneEditText.setError(getString(R.string.enter_valid_number));
             phoneEditText.requestFocus();
             return;
         }

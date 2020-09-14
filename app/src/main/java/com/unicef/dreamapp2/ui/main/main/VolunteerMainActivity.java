@@ -1,6 +1,7 @@
 package com.unicef.dreamapp2.ui.main.main;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,14 +51,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChatActivity;
 import com.unicef.dreamapp2.ui.chat.ChannelsListActivity;
+import com.unicef.dreamapp2.ui.language.LanguageActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
+import com.unicef.dreamapp2.ui.questions.QuesionActivity;
 import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
@@ -67,6 +70,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 /**
  * @author Iman Augustine
@@ -122,7 +126,10 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private DatabaseReference mCustomerInfoDatabase;
     private DatabaseReference mHelpRequestDatabase;
     // Array lists
-    private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
+    private String[] list;
+    // Bottom sheet dialog
+    private BottomSheetDialog dialog;
+
     private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.burger, R.mipmap.oxygen, R.mipmap.car, R.mipmap.sos };
     // Marker map
     private Map<Marker, Object> markersMap = new HashMap<>();
@@ -156,6 +163,19 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                                     ProfileActivity.class));
                             drawerLayout.closeDrawers();
                             break;
+                        case R.id.question:
+                            // Questions and suggestions
+                            startActivity(new Intent(VolunteerMainActivity.this,
+                                    QuesionActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
+                            // Language activity
+                        case R.id.language:
+                            // Questions and suggestions
+                            startActivity(new Intent(VolunteerMainActivity.this,
+                                    LanguageActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
                             // Logs out
                         case R.id.logout:
                             drawerLayout.closeDrawers();
@@ -170,6 +190,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Accessing String array xml
+        list = getResources().getStringArray(R.array.help_array);
 
         // Initialize customer event value listener
         customerEventListener = new ValueEventListener() {
@@ -279,7 +302,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         // User type (Regular or volunteer)
         userType = navigationView.getHeaderView(0).findViewById(R.id.userType);
         // Sets text that shows who the user is: regular or volunteer
-        userType.setText("Волонтёр"); // Volunteer user
+        userType.setText(getString(R.string.user_volunteer)); // Volunteer user
         // User image
         mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.userImage);
     }
@@ -300,7 +323,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                 .into(((CircleImageView)view.findViewById(R.id.profilePicture))); // Setting user profile image
         // Help button
         Button help = view.findViewById(R.id.helpButton);
-        final BottomSheetDialog dialog = new BottomSheetDialog(this); // Creates bottom sheet dialog
+        dialog = new BottomSheetDialog(this); // Creates bottom sheet dialog
         dialog.setContentView(view); // Sets content
         // On dialog dismiss listener
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -310,29 +333,21 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         help.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
-                dialog.hide();
-                if(!customerId.equals(userId)) { // If it is not the same user
-                    startChatActivity(customerId); // Launches activity
-                } else {
-                    // Prompt to the user that this is himself
-                    Toast.makeText(VolunteerMainActivity.this, "Это вы!", Toast.LENGTH_SHORT).show();
-                }
-                dialog.dismiss();
-                isShowingBottom = false;
+                launchChatActivity(help); // Starts chat activity
             }
         });
         // Call on click
         view.findViewById(R.id.call).setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
-                makeCall(); // Call
+                makeCall(view.findViewById(R.id.call)); // Call
             }
         });
         // Send a message in WhatsApp
         view.findViewById(R.id.whatsapp).setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View view) {
-                sendWhatsapp(); // Launch WhatsApp
+                sendWhatsApp(view.findViewById(R.id.whatsapp)); // Launch WhatsApp
             }
         });
         // Send a message in Telegram
@@ -344,26 +359,71 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
         });
     }
     //-----------------------------------------------------------------------------------------------------------------------
-    private void makeCall() {
+    private void makeCall(View view) {
         // Request a permission to make a call
-        if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(VolunteerMainActivity.this, new
-                    String[]{android.Manifest.permission.CALL_PHONE}, 0);
+        new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this).setTarget(view)
+                .setPrimaryText("Позвоните напрямую по телефону").setAutoFinish(true)
+                .setPromptStateChangeListener((prompt, state) -> {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
+                    {
+                        // User has pressed the prompt target
+                        if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, 0);
+                        } else {
+                            // Make a call
+                            startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + userPhoneStr)));
+                        }
+                    }
+                }).show();
+        dialog.dismiss();
+
+      /*  if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, 0);
         } else {
             // Make a call
             startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + userPhoneStr)));
-        }
+        }*/
     }
     //-----------------------------------------------------------------------------------------------------------------------
-    private void sendWhatsapp() {
-        String url = "https://api.whatsapp.com/send?phone="+userPhoneStr;
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    private void sendWhatsApp(View view) {
+        new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
+                .setTarget(view)
+                .setAutoFinish(true)
+                .setPrimaryText("Отправьте сообщение в WhatsApp")
+                .setPromptStateChangeListener((prompt, state) -> {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
+                    {
+                        // User has pressed the prompt target
+                        String url = "https://api.whatsapp.com/send?phone="+userPhoneStr;
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    }
+                }).show();
+        dialog.dismiss();
+    }
+    // Starts chat activity
+    private void launchChatActivity(View view) {
+        // Tutorial
+        new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
+                .setTarget(view)
+                .setAutoFinish(true)
+                .setPrimaryText("Нажмите на кнопку, чтобы перейти в чат и помочь человеку")
+                .setPromptStateChangeListener((prompt, state) -> {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
+                        // User has pressed the prompt target
+                        if(!customerId.equals(userId)) { // If it is not the same user
+                            startChatActivity(customerId); // Launches activity
+                        } else {
+                            // Prompt to the user that this is himself
+                            Toast.makeText(VolunteerMainActivity.this, getString(R.string.this_is_you_warning), Toast.LENGTH_SHORT).show();
+                        }
+                        dialog.dismiss();
+                        isShowingBottom = false;
+                    }
+                }).show();
+        dialog.dismiss();
     }
     //-----------------------------------------------------------------------------------------------------------------------
     private void sendTelegram() {
-//        Intent telegram = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/iman_augustine"));
-//        startActivity(telegram);
         Intent LaunchIntent=getPackageManager().getLaunchIntentForPackage("org.telegram.messenger");
         startActivity(LaunchIntent);
     }

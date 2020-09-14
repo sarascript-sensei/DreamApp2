@@ -88,7 +88,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_account_setup);
+        setContentView(R.layout.activity_profile);
 
         try {
             // Initialized shared preferences

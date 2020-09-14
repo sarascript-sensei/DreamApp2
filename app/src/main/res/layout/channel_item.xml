@@ -39,8 +39,7 @@
         android:paddingBottom="8dp"
         android:textColor="@color/white"
         android:textSize="16dp"
-        android:text="Нажмите чтобы написать"/>
-
+        android:text="@string/click_to_write_text"/>
 
     <View
         android:layout_width="match_parent"

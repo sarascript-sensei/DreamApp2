@@ -65,7 +65,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if ( message.senderId.equals(userId) ) {
             holder.messageText1.setVisibility(View.GONE); // Showing message
             holder.messageText2.setVisibility(View.VISIBLE); // Showing message
-            holder.messageText2.setText(("Вы:\n" + message.message)); // Setting message text
+            holder.messageText2.setText((context.getString(R.string.you_sender_text)+"\n" + message.message)); // Setting message text
         } else { // The other chatter's message
             holder.messageText2.setVisibility(View.GONE); // Showing message
             holder.messageText1.setVisibility(View.VISIBLE); // Showing message

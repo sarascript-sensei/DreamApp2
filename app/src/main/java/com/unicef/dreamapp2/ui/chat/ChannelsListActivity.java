@@ -210,6 +210,7 @@ public class ChannelsListActivity extends AppCompatActivity {
             intent.putExtra("customerId", channel.getCustomerId()); // Set customer id
             intent.putExtra("volunteerId", channel.getVolunteerId()); // Set volunteer id
             startActivity(intent);
+            finish();
         } catch(Exception error) {
             Log.d(TAG, "startChatActivity: error: "+error.getLocalizedMessage());
         }

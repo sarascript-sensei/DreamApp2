@@ -290,7 +290,7 @@ public class ChatActivity extends AppCompatActivity {
                 bindToChannel(); // Binds chat members to the one channel
             } else {
                 // Prompt the user to enter message
-                Toast.makeText(this, "Введите сообщение!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.enter_message_hint), Toast.LENGTH_SHORT).show();
             }
         } catch(Exception error) {
             Log.d(TAG, "sendMessage: error: "+error.getLocalizedMessage());

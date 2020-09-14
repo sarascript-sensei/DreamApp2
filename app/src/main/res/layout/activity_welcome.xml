@@ -19,7 +19,7 @@
         android:textColor="@color/white"
         android:onClick="openVolunteerLogin"
         android:textSize="16dp"
-        android:text="Я хочу помочь" />
+        android:text="@string/want_to_help_text" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/personBtn"
@@ -32,6 +32,6 @@
         android:textColor="@color/white"
         android:onClick="openRegularLogin"
         android:textSize="16dp"
-        android:text="Мне нужна помощь" />
+        android:text="@string/need_help_text" />
 
 </LinearLayout>

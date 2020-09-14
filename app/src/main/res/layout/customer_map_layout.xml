@@ -19,5 +19,5 @@
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Мне нужна помощь" />
+        android:text="@string/need_help_text" />
 </FrameLayout>

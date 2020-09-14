@@ -50,13 +50,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
+import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
 import com.unicef.dreamapp2.ui.chat.ChannelsListActivity;
+import com.unicef.dreamapp2.ui.language.LanguageActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
+import com.unicef.dreamapp2.ui.questions.QuesionActivity;
 import com.unicef.dreamapp2.ui.rating.RatingListActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
@@ -129,7 +131,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
     // Marker options to show on the Google Map
     private MarkerOptions markerOptions;
     // Array lists
-    private String[] list = new String[]{"Лекарства", "Продукты", "СИЗ", "Попутка", "Помощь(SOS)"};
+    private String[] list;
     private int[] icons = new int[]{ R.mipmap.medicine, R.mipmap.burger, R.mipmap.oxygen, R.mipmap.car, R.mipmap.sos };
     //------------------------------DRAWER-LAYOUT-NAVIGATION-LISTENER------------------------------------------------------
 
@@ -139,24 +141,34 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                 @Override
                 public boolean onSingleClick(MenuItem item) {
                     switch (item.getItemId()) {
-                        // History
-                      /*  case R.id.history:
-                            drawerLayout.closeDrawers();
-                            Toast.makeText(CustomerMainActivity.this, "History!", Toast.LENGTH_SHORT).show();
-                            break;*/
-                            // Chat
+                        // Chat
                         case R.id.chat:
-                            startActivity(new Intent(CustomerMainActivity.this, ChannelsListActivity.class));
+                            startActivity(new Intent(CustomerMainActivity.this,
+                                    ChannelsListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                         case R.id.rating:
                             // Launch rating list activity
-                            startActivity(new Intent(CustomerMainActivity.this, RatingListActivity.class));
+                            startActivity(new Intent(CustomerMainActivity.this,
+                                    RatingListActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Change profile
                         case R.id.change_profile:
-                            startActivity(new Intent(CustomerMainActivity.this, ProfileActivity.class));
+                            startActivity(new Intent(CustomerMainActivity.this,
+                                    ProfileActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
+                        // Questions and suggestions
+                        case R.id.question:
+                            startActivity(new Intent(CustomerMainActivity.this,
+                                    QuesionActivity.class));
+                            drawerLayout.closeDrawers();
+                            break;
+                        // Language activity
+                        case R.id.language:
+                            startActivity(new Intent(CustomerMainActivity.this,
+                                    LanguageActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Logout
@@ -169,6 +181,15 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                 }
             };
     //--------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Accessing String array xml
+        list = getResources().getStringArray(R.array.help_array);
+    }
+
     //--------------------------------------ON-CREATE-ACTIVITY------------------------------------------------------------------
     // On creation of activity
     @Override
@@ -209,18 +230,8 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         // Load user's help request location
         loadHelpLocation();
 
-        // On help request listener
-        mRequest.setOnClickListener(new OnSingleClickListener() {
-            @Override
-            public void onSingleClick(View view) {
-                // Help request is cancellable
-                if (isCancellable) {
-                    cancelRequest(); // Cancel request
-                } else {
-                    requestHelp(); // Request help
-                }
-            }
-        });
+        // Set up listeners
+        setupListener();
     }
     //--------------------------------------------------------------------------------------------------------------------------
     // Initializes views
@@ -242,13 +253,29 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
             // User type (Regular or volunteer)
             userType = navigationView.getHeaderView(0).findViewById(R.id.userType);
             // Sets text that shows who the user is: regular or volunteer
-            userType.setText("Пользователь"); // Regular user
+            userType.setText(getString(R.string.user_regular)); // Regular user
             // User image
             mProfileImage = navigationView.getHeaderView(0).findViewById(R.id.userImage);
 
         } catch(NullPointerException error) {
             Log.d("CustomerMainActivity", "initView: "+error.getLocalizedMessage());
         }
+
+    }
+    // Sets up listener
+    private void setupListener() {
+        // On help request listener
+        mRequest.setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View view) {
+                // Help request is cancellable
+                if (isCancellable) {
+                    cancelRequest(); // Cancel request
+                } else {
+                    requestHelp(); // Request help
+                }
+            }
+        });
     }
     //--------------------------------------------------------------------------------------------------------------------------
     private void setMarkerOption(String problemTitle, int id) {
@@ -270,7 +297,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
         markerOptions.position(pickupLocation); // Sets the location
         // Alert dialog builder
         AlertDialog.Builder builder = new AlertDialog.Builder(CustomerMainActivity.this);
-        builder.setTitle("Я нуждаюсь в ");
+        builder.setTitle(getString(R.string.need_help_alert_title));
         // Sets list items in the AlerDialog
         builder.setItems(list, new DialogInterface.OnClickListener() {
             @Override
@@ -279,7 +306,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                 mHelpRequestDatabase.child(userID).child("iconId").setValue(id); // Id of option marker
                 mHelpRequestDatabase.child(userID).child("problem").setValue(list[id]); // Updates problem in Firebase database
                 // Informs the user that the search for volunteers has begun
-                mRequest.setText("отмена");
+                mRequest.setText(getString(R.string.cancel_help_request));
             }
         });
         // Clear traces on cancellation
@@ -298,7 +325,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 mMap.clear(); //  Clear the map
-                mRequest.setText("мне нужна помощь"); // Resetting text
+                mRequest.setText(getString(R.string.need_help_request)); // Resetting text
                 isCancellable = false; // Select a help type to cancel it again
             }
         });
@@ -363,7 +390,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                                 .fromResource(icons[id]));
                         mMap.addMarker(markerOptions); // Adds the marker to the map
                         // There was help request so it can be cancelled now
-                        mRequest.setText("отмена");
+                        mRequest.setText(getString(R.string.cancel_help_request));
                     }
                 } catch(NullPointerException error) {
                     Log.d("CustomerMainActivity", "onDataChange (loadHelpLocation): error: "+error.getLocalizedMessage());

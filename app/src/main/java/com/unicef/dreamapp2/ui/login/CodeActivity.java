@@ -165,7 +165,7 @@ public class CodeActivity extends AppCompatActivity {
                             // Sign in failed, display a message and update the UI
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 // The verification code entered was invalid
-                                codeEditText.setError("Введите правильный код");
+                                codeEditText.setError(getString(R.string.enter_valid_code));
                             }
                         }
                     }

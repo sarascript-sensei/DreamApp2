@@ -14,10 +14,14 @@ buildscript {
     }
 }
 
-allprojects {
+allprojects {tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:deprecation"
+}
     repositories {
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
+
     }
 }
 

@@ -23,7 +23,7 @@
                 android:textColor="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Режим Героя"
+                android:text="@string/hero_mode_text"
                 android:layout_margin="10sp" />
     </LinearLayout>
 
