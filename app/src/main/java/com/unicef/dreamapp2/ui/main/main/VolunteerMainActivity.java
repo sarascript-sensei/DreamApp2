@@ -311,7 +311,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
      *  Showing help requester information as bottom sheet dialog
      * */
     private void showBottomSheetDialog() {
-        // isShowingBottom = true;
         // Root view
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null); // Inflates layout_bottom
         // TextView
@@ -362,10 +361,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private void makeCall(View view) {
         // Request a permission to make a call
         new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this).setTarget(view)
-                .setPrimaryText("Позвоните напрямую по телефону").setAutoFinish(true)
+                .setPrimaryText(getString(R.string.call_by_phone_text)).setAutoFinish(true)
                 .setPromptStateChangeListener((prompt, state) -> {
-                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
-                    {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
                         // User has pressed the prompt target
                         if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                             ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, 0);
@@ -376,23 +374,14 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                     }
                 }).show();
         dialog.dismiss();
-
-      /*  if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(VolunteerMainActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, 0);
-        } else {
-            // Make a call
-            startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + userPhoneStr)));
-        }*/
     }
     //-----------------------------------------------------------------------------------------------------------------------
     private void sendWhatsApp(View view) {
         new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
-                .setTarget(view)
-                .setAutoFinish(true)
-                .setPrimaryText("Отправьте сообщение в WhatsApp")
+                .setTarget(view).setAutoFinish(true)
+                .setPrimaryText(getString(R.string.send_whatsapp_text))
                 .setPromptStateChangeListener((prompt, state) -> {
-                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED)
-                    {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
                         // User has pressed the prompt target
                         String url = "https://api.whatsapp.com/send?phone="+userPhoneStr;
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -404,9 +393,8 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
     private void launchChatActivity(View view) {
         // Tutorial
         new MaterialTapTargetPrompt.Builder(VolunteerMainActivity.this)
-                .setTarget(view)
-                .setAutoFinish(true)
-                .setPrimaryText("Нажмите на кнопку, чтобы перейти в чат и помочь человеку")
+                .setTarget(view).setAutoFinish(true)
+                .setPrimaryText(getString(R.string.goto_chat_help))
                 .setPromptStateChangeListener((prompt, state) -> {
                     if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
                         // User has pressed the prompt target
@@ -414,7 +402,9 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                             startChatActivity(customerId); // Launches activity
                         } else {
                             // Prompt to the user that this is himself
-                            Toast.makeText(VolunteerMainActivity.this, getString(R.string.this_is_you_warning), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(VolunteerMainActivity.this,
+                                    getString(R.string.this_is_you_warning),
+                                    Toast.LENGTH_SHORT).show();
                         }
                         dialog.dismiss();
                         isShowingBottom = false;

@@ -47,4 +47,7 @@
     <string name="hero_mode_text">Hero mode</string>
     <string name="this_is_you_warning">This is you!</string>
     <string name="help_text">Help</string>
+    <string name="call_by_phone_text">Call directly by phone</string>
+    <string name="send_whatsapp_text">Send a message to WhatsApp</string>
+    <string name="goto_chat_help">Click on the button to go to the chat and help the person</string>
 </resources>

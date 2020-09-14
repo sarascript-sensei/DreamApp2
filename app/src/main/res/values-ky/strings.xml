@@ -47,5 +47,8 @@
     <string name="hero_mode_text">Режим героя</string>
     <string name="this_is_you_warning">Это вы!</string>
     <string name="help_text">Помочь</string>
+    <string name="call_by_phone_text">Позвоните напрямую по телефону</string>
+    <string name="send_whatsapp_text">Отправьте сообщение в WhatsApp</string>
+    <string name="goto_chat_help">Нажмите на кнопку, чтобы перейти в чат и помочь человеку</string>
 
 </resources>
