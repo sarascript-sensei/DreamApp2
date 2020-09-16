@@ -31,20 +31,17 @@ public class MainActivity extends AppCompatActivity {
         shared = MyPreferenceManager.getMySharedPreferences(this);
         userType = shared.getString(MyPreferenceManager.USER_TYPE, null);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-                    if (userType.equals(MyPreferenceManager.REGULAR_USER)) {
-                        startActivity(new Intent(MainActivity.this, CustomerMainActivity.class));
-                    } else {
-                        startActivity(new Intent(MainActivity.this, VolunteerMainActivity.class));
-                    }
+        new Handler().postDelayed(() -> {
+            if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+                if (userType.equals(MyPreferenceManager.REGULAR_USER)) {
+                    startActivity(new Intent(MainActivity.this, CustomerMainActivity.class));
                 } else {
-                    startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
+                    startActivity(new Intent(MainActivity.this, VolunteerMainActivity.class));
                 }
+            } else {
+                startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
             }
-        }, 800);
+        }, 1000);
     }
 
     @Override

@@ -175,6 +175,7 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                             startActivity(new Intent(VolunteerMainActivity.this,
                                     LanguageActivity.class));
                             drawerLayout.closeDrawers();
+                            finish();
                             break;
                             // Logs out
                         case R.id.logout:

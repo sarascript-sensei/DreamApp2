@@ -154,7 +154,7 @@ public class CodeActivity extends AppCompatActivity {
             // Signing the user
             signInWithPhoneAuthCredential(credential);
         } else {
-            Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CodeActivity.this, getString(R.string.otp_error_occurred), Toast.LENGTH_LONG).show();
         }
     }
 

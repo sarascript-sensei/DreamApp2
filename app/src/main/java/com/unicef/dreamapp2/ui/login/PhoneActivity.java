@@ -63,12 +63,12 @@ public class PhoneActivity extends AppCompatActivity {
         // Getting entered phone number with the country code
         String phone = "+"+ccp.getSelectedCountryCode() + phoneEditText.getText().toString().trim();
 
-        // Checking phone number format/correctness
-//        if(phone.length()<9) {
-//            phoneEditText.setError(getString(R.string.enter_valid_number));
-//            phoneEditText.requestFocus();
-//            return;
-//        }
+        // Checking phone number format correctness
+        if(phone.length()<13) {
+            phoneEditText.setError(getString(R.string.enter_valid_number));
+            phoneEditText.requestFocus();
+            return;
+        }
 
         Intent intent = new Intent(this, CodeActivity.class);
         intent.putExtra("mobile", phone);

@@ -170,6 +170,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             startActivity(new Intent(CustomerMainActivity.this,
                                     LanguageActivity.class));
                             drawerLayout.closeDrawers();
+                            finish();
                             break;
                             // Logout
                         case R.id.logout:
