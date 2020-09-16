@@ -79,4 +79,11 @@ dependencies {
 
     // Localization
     implementation "com.github.YarikSOffice:lingver:1.3.0"
+
+    // EasyPermissions
+    // For developers using AndroidX in their applications
+    implementation 'pub.devrel:easypermissions:3.0.0'
+
+    // For developers using the Android Support Library
+    // implementation 'pub.devrel:easypermissions:2.0.1'
 }

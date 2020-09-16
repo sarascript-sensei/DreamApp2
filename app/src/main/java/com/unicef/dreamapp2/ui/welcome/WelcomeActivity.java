@@ -11,10 +11,14 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.ui.login.PhoneActivity;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
 *
@@ -25,6 +29,10 @@ import com.unicef.dreamapp2.ui.login.PhoneActivity;
 * */
 
 public class WelcomeActivity extends AppCompatActivity {
+
+    // Request location permission
+    private final int REQUEST_LOCATION_PERMISSION = 1;
+
     // Global variables
     private Button volunteerBtn; // Volunteer
     private Button userBtn; // A person
@@ -44,7 +52,8 @@ public class WelcomeActivity extends AppCompatActivity {
         editor = shared.edit();
 
         // Checks location permission
-        checkLocationPermission();
+        // checkLocationPermission();
+        requestLocationPermission();
     }
 
     // Starts regular person log in activity
@@ -59,7 +68,27 @@ public class WelcomeActivity extends AppCompatActivity {
         startActivity(new Intent(this, PhoneActivity.class));
     }
 
-    private void checkLocationPermission() {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    public void requestLocationPermission() {
+        String[] perms = { Manifest.permission.ACCESS_FINE_LOCATION };
+        if(EasyPermissions.hasPermissions(this, perms)) {
+            Toast.makeText(this, getString(R.string.permission_granted_alert), Toast.LENGTH_SHORT).show();
+        }
+        else {
+            EasyPermissions.requestPermissions(this,
+                    getString(R.string.please_grant_permission_alert), REQUEST_LOCATION_PERMISSION, perms);
+        }
+    }
+
+    /*private void checkLocationPermission() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     ActivityCompat.requestPermissions(WelcomeActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -67,5 +96,5 @@ public class WelcomeActivity extends AppCompatActivity {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                 }
             }
-    }
+    }*/
 }

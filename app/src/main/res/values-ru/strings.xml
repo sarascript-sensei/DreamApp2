@@ -50,5 +50,8 @@
     <string name="call_by_phone_text">Позвоните напрямую по телефону</string>
     <string name="send_whatsapp_text">Отправьте сообщение в WhatsApp</string>
     <string name="goto_chat_help">Нажмите на кнопку, чтобы перейти в чат и помочь человеку</string>
+    <string name="permission_granted_alert">Разрешение уже предоставлено</string>
+    <string name="please_grant_permission_alert">Пожалуйста, предоставьте разрешение на местоположение</string>
+    <string name="otp_error_occurred">Возникла ошибка, попробуйте позже!</string>
 
 </resources>

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CodeActivity extends AppCompatActivity {
 
+    // TAG
     private String TAG = "CodeActivity";
 
     // Global variables
@@ -41,8 +43,8 @@ public class CodeActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
 
-    private String mVerificationId;
-    private String phone;
+    private String mVerificationId; // Verification id
+    private String phone; // Phone number
     private PhoneAuthProvider.ForceResendingToken mResendToken;
 
     private SharedPreferences shared = null;
@@ -56,6 +58,9 @@ public class CodeActivity extends AppCompatActivity {
 
         @Override
         public void onVerificationCompleted(PhoneAuthCredential credential) {
+
+            // Toast.makeText(CodeActivity.this, "Verification completed!", Toast.LENGTH_SHORT).show();
+
             // This callback will be invoked in two situations:
             // 1 - Instant verification. In some cases the phone number can be instantly
             //     verified without needing to send or enter a verification code.
@@ -64,6 +69,7 @@ public class CodeActivity extends AppCompatActivity {
             //     user action.
             String code = credential.getSmsCode();
             if(code!=null) {
+                // Setting code in the code edit text
                 codeEditText.setText(code);
                 // verifying the code
                 verifyVerificationCode(code);
@@ -78,12 +84,16 @@ public class CodeActivity extends AppCompatActivity {
             // Save verification ID and resending token so we can use them later
             mVerificationId = verificationId;
             mResendToken = token;
+
+            // Toast.makeText(CodeActivity.this, "Code sent!", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onVerificationFailed(@NonNull FirebaseException e) {
             // Verification failed due to wrong configurations with Firebase
             Log.d(TAG, "onVerificationFailed:" + e.getLocalizedMessage());
+            Toast.makeText(CodeActivity.this, getString(R.string.otp_error_occurred), Toast.LENGTH_LONG).show();
+            // finish();
         }
     };
 
@@ -101,6 +111,7 @@ public class CodeActivity extends AppCompatActivity {
 
         // Phone number from the previous step (Enter number)
         phone = getIntent().getStringExtra("mobile");
+
         // Send verification code to the given number
         sendVerificationCode(phone);
 
@@ -111,18 +122,20 @@ public class CodeActivity extends AppCompatActivity {
 
     // Initializes views
     private void initView() {
-        codeEditText = findViewById(R.id.codeEditText);
-        confirmBtn = findViewById(R.id.confirmButton);
+        codeEditText = findViewById(R.id.codeEditText); // Edit text code
+        confirmBtn = findViewById(R.id.confirmButton); // Confirm button
     }
 
     // On confirm click
     public void onConfirmClick(View view) {
+
+        // Get the received OTP
         String code = codeEditText.getText().toString().trim();
 
         // If code is empty or code's length is less than 6
         if (code.isEmpty() || code.length()<6) {
             // Show error
-            codeEditText.setError("Введите верный код");
+            codeEditText.setError(getString(R.string.enter_valid_code));
             codeEditText.requestFocus();
             return;
         }
@@ -134,16 +147,21 @@ public class CodeActivity extends AppCompatActivity {
     // Verify verification code
     private void verifyVerificationCode(String otp) {
         // Creating the credential
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, otp);
-        // Signing the user
-        signInWithPhoneAuthCredential(credential);
+        PhoneAuthCredential credential;
+
+        if(mVerificationId!=null) {
+            credential = PhoneAuthProvider.getCredential(mVerificationId, otp);
+            // Signing the user
+            signInWithPhoneAuthCredential(credential);
+        } else {
+            Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Sending verification code
     private void sendVerificationCode(String mobile) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                mobile,
-                60,
+                mobile, 60,
                 TimeUnit.SECONDS,
                 TaskExecutors.MAIN_THREAD,
                 mCallbacks);
