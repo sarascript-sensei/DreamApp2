@@ -16,13 +16,4 @@
         <item name="android:windowFullscreen">false</item>-->
     </style>
 
-    <style name="ToolbarTheme">
-        <item name="android:textSize">24sp</item>
-        <item name="android:textColor">#fff</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="chatBackground" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:windowBackground">@drawable/help1</item>
-    </style>
 </resources>

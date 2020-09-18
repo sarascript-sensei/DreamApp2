@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">Карта Желаний</string>
-    <string name="title_activity_maps">Карта</string>
-    <string name="bottom_1">Кирүү</string>
-    <string name="bottom_2">Каттоо</string>
-    <string name="StatusVolunteer">Ыктыяр үчүн кирүү</string>
-    <string name="TextView3">Азырынча аккаунтуңуз жокпу?</string>
     <string name="title_activity_volunteer_map">Карта</string>
     <string name="title_activity_person_map">Карта</string>
     <string name="phone_number_hint_text">Телефон номуру</string>
@@ -23,11 +18,6 @@
     <string name="questions_title">Суроолор жана сунуштар</string>
     <string name="language_title">Тил</string>
     <string name="exit_title">Чыгуу</string>
-    <string name="medicine">Дарылар</string>
-    <string name="food">Продуктулар</string>
-    <string name="oxygen">СИЗ</string>
-    <string name="car">Попутка</string>
-    <string name="sos">Жардам(SOS)</string>
     <string name="user_volunteer">Ыктыярчы</string>
     <string name="user_regular">Колдонуучу</string>
     <string name="enter_valid_number">Туура номерди жазыңыз</string>
@@ -37,7 +27,6 @@
     <string name="cancel_help_request">жокко чыгаруу</string>
     <string name="name_text_hint">Толук аты</string>
     <string name="problem_text_hint">Көйгөй (эгер ыктыярчы болбосо)</string>
-    <string name="phone_text_hint">Номер (өлкөнүн коду менен)</string>
     <string name="save_text_hint">Сактоо</string>
     <string name="want_to_help_text">Мен жардам бергим келет</string>
     <string name="need_help_text">Мага жардам керек</string>

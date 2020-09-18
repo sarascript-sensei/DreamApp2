@@ -167,8 +167,7 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                             break;
                         // Language activity
                         case R.id.language:
-                            startActivity(new Intent(CustomerMainActivity.this,
-                                    LanguageActivity.class));
+                            startActivity(new Intent(CustomerMainActivity.this, LanguageActivity.class));
                             drawerLayout.closeDrawers();
                             finish();
                             break;

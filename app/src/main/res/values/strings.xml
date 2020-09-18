@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">Карта Желаний</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="bottom_1">Enter</string>
-    <string name="bottom_2">Register</string>
-    <string name="StatusVolunteer">Enter as a volunteer</string>
-    <string name="TextView3">No account yet?</string>
     <string name="title_activity_volunteer_map">Map</string>
     <string name="title_activity_person_map">Map</string>
     <string name="phone_number_hint_text">Phone number</string>
@@ -23,11 +18,6 @@
     <string name="questions_title">Questions and suggestions</string>
     <string name="language_title">Language</string>
     <string name="exit_title">Exit</string>
-    <string name="medicine">Medicines</string>
-    <string name="food">Food</string>
-    <string name="oxygen">Oxygen</string>
-    <string name="car">Need a lift</string>
-    <string name="sos">SOS</string>
     <string name="user_volunteer">Volunteer</string>
     <string name="user_regular">Regular user</string>
     <string name="enter_valid_number">Enter valid number</string>
@@ -37,7 +27,6 @@
     <string name="cancel_help_request">cancel</string>
     <string name="name_text_hint">Full name</string>
     <string name="problem_text_hint">Problem (if not a volunteer)</string>
-    <string name="phone_text_hint">Number (with country code)</string>
     <string name="save_text_hint">Save</string>
     <string name="want_to_help_text">I want to help</string>
     <string name="need_help_text">I need help</string>

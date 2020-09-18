@@ -74,6 +74,8 @@ public class CodeActivity extends AppCompatActivity {
                 // verifying the code
                 verifyVerificationCode(code);
             }
+
+            // signInWithPhoneAuthCredential(credential);
         }
 
         @Override
@@ -95,6 +97,13 @@ public class CodeActivity extends AppCompatActivity {
             Toast.makeText(CodeActivity.this, getString(R.string.otp_error_occurred), Toast.LENGTH_LONG).show();
             // finish();
         }
+
+        @Override
+        public void onCodeAutoRetrievalTimeOut(@NonNull String s) {
+            super.onCodeAutoRetrievalTimeOut(s);
+
+            Toast.makeText(CodeActivity.this, "Code retrieval timeout! Try again!", Toast.LENGTH_LONG).show();
+        }
     };
 
     // On creation
@@ -108,6 +117,7 @@ public class CodeActivity extends AppCompatActivity {
 
         // Firebase auth
         mAuth = FirebaseAuth.getInstance();
+        mAuth.useAppLanguage();
 
         // Phone number from the previous step (Enter number)
         phone = getIntent().getStringExtra("mobile");
@@ -159,12 +169,23 @@ public class CodeActivity extends AppCompatActivity {
     }
 
     // Sending verification code
-    private void sendVerificationCode(String mobile) {
+    private void sendVerificationCode(String phone) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                mobile, 60,
+                phone, 60,
                 TimeUnit.SECONDS,
                 TaskExecutors.MAIN_THREAD,
                 mCallbacks);
+    }
+
+    // Resending OTP code
+    public void resendVerificationCode(View view) {
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                phone,                 // Phone number to verify
+                60,                 // Timeout duration
+                TimeUnit.SECONDS,      // Unit of timeout
+                this,          // Activity (for callback binding)
+                mCallbacks,            // OnVerificationStateChangedCallbacks
+                mResendToken);         // ForceResendingToken from callbacks
     }
 
     // Sign in with the credential sent in onVerificationCompleted

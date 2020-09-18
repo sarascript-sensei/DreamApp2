@@ -165,15 +165,13 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                             break;
                         case R.id.question:
                             // Questions and suggestions
-                            startActivity(new Intent(VolunteerMainActivity.this,
-                                    QuesionActivity.class));
+                            startActivity(new Intent(VolunteerMainActivity.this, QuesionActivity.class));
                             drawerLayout.closeDrawers();
                             break;
                             // Language activity
                         case R.id.language:
                             // Questions and suggestions
-                            startActivity(new Intent(VolunteerMainActivity.this,
-                                    LanguageActivity.class));
+                            startActivity(new Intent(VolunteerMainActivity.this, LanguageActivity.class));
                             drawerLayout.closeDrawers();
                             finish();
                             break;

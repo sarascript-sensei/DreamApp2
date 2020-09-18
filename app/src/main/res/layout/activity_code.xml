@@ -46,6 +46,17 @@
         android:textSize="16dp"
         android:text="@string/confirm_button_text" />
 
+    <TextView
+        android:id="@+id/resendCodeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Resend code"
+        android:gravity="center"
+        android:textSize="18dp"
+        android:onClick="resendVerificationCode"
+        android:textColor="@color/white"
+        />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

@@ -133,7 +133,6 @@ public class ProfileActivity extends AppCompatActivity {
         mProblemField = findViewById(R.id.problemEditText); // User problem
         mProfileImage = findViewById(R.id.profilePicture); // User profile image
         mBackBtn = findViewById(R.id.backButton); // Back button
-        mSaveBtn = findViewById(R.id.confirm); // Save profile information button
 
         // The volunteer does not need to tell his problem
         // He is supposed to help solve others' problems!

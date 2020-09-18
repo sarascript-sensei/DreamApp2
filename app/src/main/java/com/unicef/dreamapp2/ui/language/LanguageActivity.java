@@ -104,24 +104,28 @@ public class LanguageActivity extends AppCompatActivity {
     private void setSelectedLanguage(String language) {
         Lingver.getInstance().setLocale(this, language);
         editor.remove("locale").putString("locale", language).commit();
-        finish();
+        returnBack();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
+    private void returnBack() {
         // If a regular user
         if (userType.equals(MyPreferenceManager.REGULAR_USER)) {
             startActivity(new Intent(this, CustomerMainActivity.class)); // Start customer activity
         } else {
             startActivity(new Intent(this, VolunteerMainActivity.class)); // Start volunteer activity
         }
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        returnBack();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
     }
 
 }

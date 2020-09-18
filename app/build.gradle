@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     buildToolsVersion "30.0.1"
     lintOptions {
         abortOnError false
@@ -12,9 +12,9 @@ android {
     defaultConfig {
         applicationId "com.unicef.dreamapp2"
         minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 3
-        versionName "1.1"
+        targetSdkVersion 30
+        versionCode 5
+        versionName "1.2"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,7 +29,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            manifestPlaceholders = [google_map_key: "AIzaSyAkT5BfHnyj71_1BTWaVSpzM4jW50krR5s"]
+            //  manifestPlaceholders = [google_map_key: "AIzaSyAkT5BfHnyj71_1BTWaVSpzM4jW50krR5s"]
+            manifestPlaceholders = [google_map_key: "AIzaSyBWvyqYPeOWPoEe-wVnFhDdgkt4pSoWUcc"]
+        }
+    }
+    bundle {
+        language {
+            enableSplit = false
         }
     }
 }
@@ -44,16 +50,16 @@ dependencies {
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     testImplementation 'junit:junit:4.13'
-    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support:design:30.1.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.getbase:floatingactionbutton:1.10.1'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:appcompat-v7:30.1.0'
     implementation 'com.github.clans:fab:1.6.2'
 
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    
+
     //Firebase
     implementation 'com.google.firebase:firebase-messaging:20.2.4'
     implementation 'com.firebase:geofire-android:3.0.0'

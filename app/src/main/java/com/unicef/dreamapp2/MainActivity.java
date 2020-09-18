@@ -20,6 +20,7 @@ import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseAuth mAuth;
     private SharedPreferences shared = null;
     private String userType = null;
 
@@ -31,8 +32,11 @@ public class MainActivity extends AppCompatActivity {
         shared = MyPreferenceManager.getMySharedPreferences(this);
         userType = shared.getString(MyPreferenceManager.USER_TYPE, null);
 
+        mAuth = FirebaseAuth.getInstance();
+        mAuth.useAppLanguage();
+
         new Handler().postDelayed(() -> {
-            if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            if(mAuth.getCurrentUser()!=null) {
                 if (userType.equals(MyPreferenceManager.REGULAR_USER)) {
                     startActivity(new Intent(MainActivity.this, CustomerMainActivity.class));
                 } else {
