@@ -39,6 +39,8 @@ public class PhoneActivity extends AppCompatActivity {
     private SharedPreferences shared = null;
     private SharedPreferences.Editor editor = null;
 
+
+
     // On creation
     @Override
     protected void onCreate(Bundle savedInstanceState) {

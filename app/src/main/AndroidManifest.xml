@@ -96,6 +96,8 @@
             android:label="@string/title_activity_volunteer_map"
             tools:ignore="Instantiatable" />
         <activity android:name=".ui.welcome.WelcomeActivity" />
+        <activity android:name=".ui.appintro.CustomAppIntro"
+            android:label="My Custom AppIntro" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">

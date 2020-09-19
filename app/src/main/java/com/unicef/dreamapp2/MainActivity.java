@@ -9,6 +9,7 @@ import android.os.Handler;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
+import com.unicef.dreamapp2.ui.appintro.CustomAppIntro;
 import com.unicef.dreamapp2.ui.main.main.CustomerMainActivity;
 import com.unicef.dreamapp2.ui.main.main.VolunteerMainActivity;
 import com.unicef.dreamapp2.ui.welcome.WelcomeActivity;
@@ -38,12 +39,13 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(() -> {
             if(mAuth.getCurrentUser()!=null) {
                 if (userType.equals(MyPreferenceManager.REGULAR_USER)) {
-                    startActivity(new Intent(MainActivity.this, CustomerMainActivity.class));
+                    startActivity(new Intent(MainActivity.this, CustomerMainActivity.class)); // Enter customer main page
                 } else {
-                    startActivity(new Intent(MainActivity.this, VolunteerMainActivity.class));
+                    startActivity(new Intent(MainActivity.this, VolunteerMainActivity.class)); // Enter volunteer page
                 }
             } else {
-                startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
+                startActivity(new Intent(MainActivity.this, CustomAppIntro.class));
+               // startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
             }
         }, 1000);
     }

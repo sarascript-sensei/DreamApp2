@@ -42,4 +42,11 @@
     <string name="permission_granted_alert">Permission already granted</string>
     <string name="please_grant_permission_alert">Please grant the location permission</string>
     <string name="otp_error_occurred">An error occurred, please try again later!</string>
+    <string name="resend_code_text">Resend code</string>
+    <string name="welcome_title">Welcome!</string>
+    <string name="map_title">Google Map</string>
+    <string name="map_description">Click on the \"I need help\" button to leave a sticker on the map</string>
+    <string name="chat_description">As a volunteer, you can write to a person in the chat, constantly check the chat if you left a help sticker</string>
+
+
 </resources>
