@@ -16,17 +16,18 @@
         android:layout_alignParentBottom="true"
         android:gravity="center"
         android:padding="10dp"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/black"
+        android:fontFamily=""
         android:textSize="20dp"
         android:textStyle="bold"
-        tools:text="Iman Uulu Kurbanbaev" />
+        tools:text="Volunteer Name" />
 
 
     <LinearLayout
         android:id="@+id/likesLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@color/red"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:gravity="center"

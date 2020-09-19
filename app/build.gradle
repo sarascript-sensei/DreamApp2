@@ -60,6 +60,8 @@ dependencies {
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
 
+    //gif
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.19'
     //Firebase
     implementation 'com.google.firebase:firebase-messaging:20.2.4'
     implementation 'com.firebase:geofire-android:3.0.0'

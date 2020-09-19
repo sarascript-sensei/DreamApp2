@@ -29,6 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="n">
+        <activity android:name=".PsychologyHelp"></activity>
 
         <service
             android:name=".service.LocalFirebaseMessagingService"
@@ -64,10 +65,12 @@
         <activity
             android:name=".ui.login.ProfileActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".ui.language.LanguageActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ui.questions.QuesionActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.language.LanguageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.questions.QuesionActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.chat.ChatActivity"
             android:screenOrientation="portrait"
@@ -96,7 +99,8 @@
             android:label="@string/title_activity_volunteer_map"
             tools:ignore="Instantiatable" />
         <activity android:name=".ui.welcome.WelcomeActivity" />
-        <activity android:name=".ui.appintro.CustomAppIntro"
+        <activity
+            android:name=".ui.appintro.CustomAppIntro"
             android:label="My Custom AppIntro" />
         <activity
             android:name=".MainActivity"
