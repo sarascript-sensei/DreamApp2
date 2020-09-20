@@ -27,6 +27,11 @@
           android:title="@string/language_title"
           android:checkable="false" />
       <item
+          android:id="@+id/psychologicalhelp"
+          android:icon="@drawable/ic_baseline_favorite_border_24"
+          android:title="@string/psychological_help"
+          android:checkable="false" />
+      <item
           android:id="@+id/logout"
           android:icon="@drawable/ic_exit"
           android:title="@string/exit_title"

@@ -50,6 +50,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.unicef.dreamapp2.PsychologyHelp;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
@@ -168,6 +169,12 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                         // Language activity
                         case R.id.language:
                             startActivity(new Intent(CustomerMainActivity.this, LanguageActivity.class));
+                            drawerLayout.closeDrawers();
+                            finish();
+                            break;
+                            // Psychological Help activity
+                        case R.id.psychologicalhelp:
+                            startActivity(new Intent(CustomerMainActivity.this, PsychologyHelp.class));
                             drawerLayout.closeDrawers();
                             finish();
                             break;

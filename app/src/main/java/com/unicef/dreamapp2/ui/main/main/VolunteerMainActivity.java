@@ -1,7 +1,6 @@
 package com.unicef.dreamapp2.ui.main.main;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,13 +50,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.unicef.dreamapp2.PsychologyHelp;
 import com.unicef.dreamapp2.R;
 import com.unicef.dreamapp2.application.MyPreferenceManager;
 import com.unicef.dreamapp2.application.Utility;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickListener;
 import com.unicef.dreamapp2.singleclicklistener.OnSingleClickNavigationViewListener;
-import com.unicef.dreamapp2.ui.chat.ChatActivity;
 import com.unicef.dreamapp2.ui.chat.ChannelsListActivity;
+import com.unicef.dreamapp2.ui.chat.ChatActivity;
 import com.unicef.dreamapp2.ui.language.LanguageActivity;
 import com.unicef.dreamapp2.ui.login.ProfileActivity;
 import com.unicef.dreamapp2.ui.questions.QuesionActivity;
@@ -172,6 +172,12 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         case R.id.language:
                             // Questions and suggestions
                             startActivity(new Intent(VolunteerMainActivity.this, LanguageActivity.class));
+                            drawerLayout.closeDrawers();
+                            finish();
+                            break;
+                        // Psychological Help activity
+                        case R.id.psychologicalhelp:
+                            startActivity(new Intent(VolunteerMainActivity.this, PsychologyHelp.class));
                             drawerLayout.closeDrawers();
                             finish();
                             break;

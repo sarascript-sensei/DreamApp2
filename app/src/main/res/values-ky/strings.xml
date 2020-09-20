@@ -47,5 +47,5 @@
     <string name="map_title">Google Картасы</string>
     <string name="map_description">Картада стикер калтыруу үчүн \"Мага жардам керек\" баскычын басыңыз</string>
     <string name="chat_description">Волонтер катары, сиз адамга чатка жаза аласыз, эгерде жардам стикерин калтырып койсоңуз, анда чатты такай текшерип туруңуз</string>
-
+    <string name="psychological_help"> Психологиялык жардам</string>
 </resources>
