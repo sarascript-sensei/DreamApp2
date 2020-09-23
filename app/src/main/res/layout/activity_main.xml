@@ -25,6 +25,25 @@
         android:src="@drawable/ut_loog" />
   </androidx.cardview.widget.CardView>
 
+  <androidx.cardview.widget.CardView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="20dp"
+      android:layout_below="@id/cardView"
+      android:elevation="12dp"
+      app:cardCornerRadius="12dp">
+
+    <ImageView
+        android:id="@+id/unicefLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="92dp"
+        android:scaleType="centerCrop"
+        android:layout_gravity="center_horizontal"
+        android:adjustViewBounds="true"
+        android:background="@color/black"
+        android:src="@drawable/unicef_logo" />
+  </androidx.cardview.widget.CardView>
+
 <!--  <com.unicef.dreamapp2.custom.RoundRectCornerImageView
       android:id="@+id/logo"
       android:layout_width="200dp"
