@@ -67,17 +67,11 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/gmail"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="@drawable/ic_gmail"/>
-
-        <ImageButton
             android:id="@+id/instagram"
-            android:layout_marginStart="30dp"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="@drawable/ic_instagram"/>
+            android:layout_marginStart="30dp"
+            android:background="@drawable/ic_instagram" />
 
     </LinearLayout>
     
