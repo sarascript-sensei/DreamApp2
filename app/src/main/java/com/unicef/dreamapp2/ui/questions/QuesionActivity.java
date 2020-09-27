@@ -13,7 +13,6 @@ import com.unicef.dreamapp2.R;
 
 public class QuesionActivity extends AppCompatActivity {
 
-    private ImageButton gmail;
     private ImageButton instagram;
 
     @Override
@@ -21,15 +20,8 @@ public class QuesionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
 
-        gmail = findViewById(R.id.gmail);
         instagram = findViewById(R.id.instagram);
 
-        gmail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
         instagram.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
