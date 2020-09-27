@@ -176,7 +176,6 @@ public class CustomerMainActivity extends FragmentActivity implements OnMapReady
                         case R.id.psychologicalhelp:
                             startActivity(new Intent(CustomerMainActivity.this, PsychologyHelp.class));
                             drawerLayout.closeDrawers();
-                            finish();
                             break;
                             // Logout
                         case R.id.logout:

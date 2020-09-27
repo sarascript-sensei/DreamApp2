@@ -179,7 +179,6 @@ public class VolunteerMainActivity extends FragmentActivity implements OnMapRead
                         case R.id.psychologicalhelp:
                             startActivity(new Intent(VolunteerMainActivity.this, PsychologyHelp.class));
                             drawerLayout.closeDrawers();
-                            finish();
                             break;
                             // Logs out
                         case R.id.logout:
