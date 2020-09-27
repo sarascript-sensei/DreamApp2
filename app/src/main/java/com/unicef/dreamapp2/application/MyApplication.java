@@ -1,10 +1,12 @@
 package com.unicef.dreamapp2.application;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
+import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import com.yariksoffice.lingver.Lingver;
@@ -27,6 +29,7 @@ public class MyApplication extends MultiDexApplication {
     // On creation
     @Override
     public void onCreate() {
+
         preferenceManager = MyPreferenceManager.getMySharedPreferences(this.getApplicationContext()); // Shared preferences
         String currentLanguage = preferenceManager.getString("locale", "ru"); // Getting app language
         assert currentLanguage != null; // If current language is not null
@@ -34,6 +37,12 @@ public class MyApplication extends MultiDexApplication {
 
         super.onCreate();
         instance = this;
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     // On configuration changed

@@ -22,7 +22,7 @@
         android:scaleType="centerCrop"
         android:layout_gravity="center_horizontal"
         android:adjustViewBounds="true"
-        android:src="@drawable/ut_loog" />
+        android:src="@drawable/rsz_ut_logo" />
   </androidx.cardview.widget.CardView>
 
   <androidx.cardview.widget.CardView
