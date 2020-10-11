@@ -1,8 +1,10 @@
-package com.unicef.dreamapp2;
+package com.unicef.dreamapp2.ui.psychology;
 
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.unicef.dreamapp2.R;
 
 public class PsychologyHelp extends AppCompatActivity {
 

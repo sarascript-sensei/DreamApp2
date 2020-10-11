@@ -56,7 +56,7 @@
             android:name=".ui.community.Community"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".PsychologyHelp"
+        <activity android:name=".ui.psychology.PsychologyHelp"
             android:screenOrientation="portrait"/>
 
         <activity
