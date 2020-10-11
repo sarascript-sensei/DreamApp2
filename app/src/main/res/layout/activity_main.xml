@@ -1,53 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/help1"
     android:gravity="bottom|center">
 
- <!-- <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-      <Button
-          android:id="@+id/buttonOk"
-          android:layout_width="200dp"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center"
-          android:layout_marginTop="15dp"
-          android:background="@drawable/button_background"
-          android:text="Ok"
-          android:textColor="@color/colorPrimary" />
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/imageLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="70dp"
-        android:layout_gravity="center_horizontal"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:src="@drawable/rsz_ut_logo" />
-
-  </LinearLayout>
-
-
-  <androidx.cardview.widget.CardView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="20dp"
-      android:layout_below="@id/cardView"
-      android:elevation="12dp"
-      app:cardCornerRadius="12dp"/>
-  -->
-</RelativeLayout>
+</LinearLayout>
