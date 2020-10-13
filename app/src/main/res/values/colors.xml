@@ -8,4 +8,5 @@
     <color name = "blackness">#000000</color>
     <color name="transparent">#00000000</color>
     <color name="red">#FF0000</color>
+    <color name="fun">#FAF9BC</color>
 </resources>
